@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>simulator_e130</name>
+  <version>0.1.0</version>
+  <description>Configuration and maps to simulate turtlebots in CTU's KN:E-130</description>
+
+  <maintainer email="gael.ecorchard@cvut.cz">Gaël Écorchard</maintainer>
+
+  <license>MIT</license>
+
+
+  <!-- Url tags are optional, but multiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <!-- <url type="website">http://wiki.ros.org/simulator_e130</url> -->
+
+
+  <author email="gael.ecorchard@cvut.cz">Gaël Écorchard</author>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>stdr_gui</exec_depend>
+  <exec_depend>stdr_robot</exec_depend>
+  <exec_depend>stdr_server</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>turtlebot_stdr</exec_depend>
+
+
+  <export>
+
+  </export>
+</package>

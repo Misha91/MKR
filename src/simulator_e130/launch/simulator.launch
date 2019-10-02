@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<include file="$(find simulator_e130)/launch/server.launch" />
+
+	<include file="$(find simulator_e130)/launch/gui.launch" />
+
+	<include file="$(find simulator_e130)/launch/robots.launch" />
+
+</launch>
+

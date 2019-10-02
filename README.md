@@ -15,6 +15,8 @@ Finished work to be indicated as:
 A* planning - MI  
 <br/>
 Feel free to split any task on any number of sub-tasks, it's easier to do few small tasks rather than one big.  
+<br />
+Install stdr_simulator and turtlebot_simulator packages yourself, because it depends on the version of ROS that you have
 <br/>
 <b>Useful Git commands:  </b>
 <br/>

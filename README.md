@@ -1,6 +1,25 @@
 # mkr_tm_ws
 *NOT IN PROGRESS*  
-
+<br/>
+<b>To-do list and status:  </b>
+<br/>
+<i>Part I</i>  
+Base robot class with properties  
+Input to create robots  
+Spawn robots in world  
+<br/>   
+<i>Part II</i>   
+A* function  
+Planning for each robot  
+Checking of colisions/deadlock  
+Path modification and veryfication  
+<br/>  
+<i>Part III</i>  
+Generating of waypoints  
+Translating of waypoints to robots  
+Position update for each time base  
+<br/>
+<br/>
 <b>Guide:  </b>
 <br/>
 If you are working under any function/task, change top line to *IN PROGRESS*, commit and push it to repo with message like "MI - in progress" - this will let us know if work in progress and let us to avoid any merge conflict (git commit -m "MI - in progress").  
@@ -16,7 +35,7 @@ A* planning - MI
 <br/>
 Feel free to split any task on any number of sub-tasks, it's easier to do few small tasks rather than one big.  
 <br />
-Install stdr_simulator and turtlebot_simulator packages yourself, because it depends on the version of ROS that you have
+Install stdr_simulator and turtlebot_simulator packages yourself, because it depends on the version of ROS that you have  
 <br/>
 <b>Useful Git commands:  </b>
 <br/>
@@ -39,23 +58,7 @@ Pull and fetch:
 git pull  
 git fetch  
 <br/>
-<br/>
-<b>To-do list and status:  </b>
-<br/>
-Part I  
-Base robot class with properties  
-Input to create robots  
-Spawn robots in world  
-<br/>   
-Part II  
-A* function  
-Planning for each robot  
-Checking of colisions/deadlock  
-Path modification and veryfication  
-<br/>  
-Part III   
-Generating of waypoints  
-Translating of waypoints to robots  
-Position update for each time base  
+
+
 
 

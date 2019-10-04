@@ -8,8 +8,8 @@ class Robot(object):
         self.name = "".join(choice(self.letters)
                             + choice(self.list_of_digits))
         
-        if not all(isinstance(x, float) or isinstance(x,int) for x in start) or not all(isinstance(x, float) or isinstance(x, int) for x in goal) :
-            raise Exception("The start and goal positions are misdefined, please use type int or float")
+        if not all(isinstance(x, float) or isinstance(x,int) for x in start) or not all(isinstance(x, float) or isinstance(x, int) for x in goal):
+            raise Exception("The start, goal and theta positions are misdefined, please use type int or float")
         else:
             self.start_pose = start
             self.goal_pose = goal

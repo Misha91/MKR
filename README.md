@@ -6,7 +6,7 @@
 <i>Part I</i>  
 Base robot class with properties - TU !Please check scripts folder
 <br/>
-Input to create robots  - TU in progress
+Input to create robots  - TU
 <br/>
 Spawn robots in world  
 <br/>   
@@ -21,6 +21,32 @@ Generating of waypoints
 Translating of waypoints to robots  
 Position update for each time base  
 <br/>
+<br/>
+<b>Initialize robots:  </b>
+<br/>
+1) Set starting positions of the robot in "robot_start_positions.csv" file, which can be found in "data" folder.
+<br/>
+The configuration is normal: x,y,theta
+<br/>
+Each row is one robot
+<br/>
+2) Consider x and y of goal position
+<br/>
+3) Run command "python robot_input.py x y", where x and y are the considered coordinates
+<br/>
+4) Check the output of terminal, it should state info about robots.
+<br/>
+5) The info is stored in "robot_data.csv" file in "data" folder
+<br/>
+<br/>
+<br/>
+<b>Suggestions for finishing the first part:</b>
+<br/>
+Have a look at robots.launch in simulator_e130 folder.
+<br/>
+You will probably need to write a script that changes its configurations so that the robots are inserted there.
+<br/>
+Have fun! :)
 <br/>
 <b>Guide:  </b>
 <br/>

@@ -4,7 +4,7 @@
 <b>To-do list and status:  </b>
 <br/>
 <i>Part I</i>  
-Base robot class with properties  
+Base robot class with properties - TU in progress
 Input to create robots  
 Spawn robots in world  
 <br/>   

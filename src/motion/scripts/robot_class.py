@@ -1,5 +1,6 @@
 from string import ascii_uppercase, digits
 from random import choice
+import os
 
 class Robot(object):
     def __init__(self, start, goal):
@@ -7,7 +8,7 @@ class Robot(object):
         self.list_of_digits = list(digits)
         self.name = "".join(choice(self.letters)
                             + choice(self.list_of_digits))
-        
+
         if not all(isinstance(x, float) or isinstance(x,int) for x in start) or not all(isinstance(x, float) or isinstance(x, int) for x in goal):
             raise Exception("The start, goal and theta positions are misdefined, please use type int or float")
         else:

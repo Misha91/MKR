@@ -49,7 +49,7 @@ init_map = rospy.wait_for_message("/map", OccupancyGrid)
 
 map = np.reshape(init_map.data, (init_map.info.height, init_map.info.width)).T
 print(init_map.info.height, init_map.info.width)
-map = skimage.measure.block_reduce(map, (10,10), np.max)
+map = skimage.measure.block_reduce(map, (20,20), np.max)
 
 print(map.shape)
 
@@ -58,15 +58,13 @@ for robot in robots:
 
 
 """PRINTING OF MAP"""
-
-for j in range(map.shape[1]):
+for j in (reversed(range(map.shape[1]))):
     str = ""
     for i in range(map.shape[0]):
         if (map[i][j] >0): str += "#"
         else: str += " "
     print(str)
 print("UPDATED")
-
 #self.grid = (morphology.grey_dilation(self.grid, size=(3,3)))
 
 

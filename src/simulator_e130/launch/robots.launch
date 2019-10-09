@@ -4,5 +4,7 @@
 
 	<node name="robot0_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 1.8 6.6 -0.1" /> 
 	<node name="robot1_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 1.4 1.0 1.0" /> 
+	<node name="robot2_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 2.4 3.0 1.5" /> 
+	<node name="robot3_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 3.4 4.0 -1.0" /> 
 
 </launch>

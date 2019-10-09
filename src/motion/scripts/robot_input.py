@@ -7,9 +7,12 @@ import sys
 import os
 
 print("We started")
-print(os.getcwd())
+path = os.getcwd()
 robots = []
+if (path.split('/')[-1] != 'mkr_tm_ws'):
+    path += '/mkr_tm_ws'
 
+print(path)
 with open('src/motion/data/robot_start_positions.csv', mode='r') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter = ',')
     for row in csv_reader:

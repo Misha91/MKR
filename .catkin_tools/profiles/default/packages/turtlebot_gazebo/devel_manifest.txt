@@ -1,0 +1,6 @@
+turtlebot_simulator/turtlebot_gazebo
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_gazebo/cmake.lock /home/timur/mkr_tm_ws/devel/./cmake.lock
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_gazebo/share/turtlebot_gazebo/cmake/turtlebot_gazeboConfig-version.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_gazebo/cmake/turtlebot_gazeboConfig-version.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_gazebo/share/turtlebot_gazebo/cmake/turtlebot_gazeboConfig.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_gazebo/cmake/turtlebot_gazeboConfig.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_gazebo/lib/pkgconfig/turtlebot_gazebo.pc /home/timur/mkr_tm_ws/devel/lib/pkgconfig/turtlebot_gazebo.pc
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_gazebo/etc/catkin/profile.d/25.turtlebot-gazebo.sh /home/timur/mkr_tm_ws/devel/etc/catkin/profile.d/25.turtlebot-gazebo.sh

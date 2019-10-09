@@ -1,0 +1,8 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_server/cmake/stdr_serverConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_server/cmake/stdr_serverConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_map_loader.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_server.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_map_server.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/stdr_server.pc
+Symlinking /home/timur/mkr_tm_ws/devel/lib/stdr_server/stdr_server_node
+Symlinking /home/timur/mkr_tm_ws/devel/lib/stdr_server/load_map

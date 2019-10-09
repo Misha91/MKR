@@ -1,0 +1,4 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/turtlebot_stdr/cmake/turtlebot_stdrConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/turtlebot_stdr/cmake/turtlebot_stdrConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/turtlebot_stdr.pc
+Symlinking /home/timur/mkr_tm_ws/devel/etc/catkin/profile.d/25.turtlebot-stdr.sh

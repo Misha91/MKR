@@ -1,0 +1,15 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_robot/cmake/stdr_robotConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_robot/cmake/stdr_robotConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_microphone_sensor.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_sonar.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_ideal_motion_controller.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_robot_nodelet.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_rfid_reader.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_thermal_sensor.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_sensor_base.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_omni_motion_controller.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_laser.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_co2_sensor.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_handle_robot.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/stdr_robot.pc
+Symlinking /home/timur/mkr_tm_ws/devel/lib/stdr_robot/robot_handler

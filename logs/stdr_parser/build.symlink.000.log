@@ -1,0 +1,4 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_parser/cmake/stdr_parserConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/stdr_parser/cmake/stdr_parserConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/libstdr_parser.so
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/stdr_parser.pc

@@ -1,0 +1,4 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/turtlebot_stage/cmake/turtlebot_stageConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/turtlebot_stage/cmake/turtlebot_stageConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/turtlebot_stage.pc
+Symlinking /home/timur/mkr_tm_ws/devel/etc/catkin/profile.d/25.turtlebot-stage.sh

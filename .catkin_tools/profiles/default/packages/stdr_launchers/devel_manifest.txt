@@ -1,0 +1,5 @@
+stdr_simulator/stdr_launchers
+/home/timur/mkr_tm_ws/devel/.private/stdr_launchers/cmake.lock /home/timur/mkr_tm_ws/devel/./cmake.lock
+/home/timur/mkr_tm_ws/devel/.private/stdr_launchers/share/stdr_launchers/cmake/stdr_launchersConfig.cmake /home/timur/mkr_tm_ws/devel/share/stdr_launchers/cmake/stdr_launchersConfig.cmake
+/home/timur/mkr_tm_ws/devel/.private/stdr_launchers/share/stdr_launchers/cmake/stdr_launchersConfig-version.cmake /home/timur/mkr_tm_ws/devel/share/stdr_launchers/cmake/stdr_launchersConfig-version.cmake
+/home/timur/mkr_tm_ws/devel/.private/stdr_launchers/lib/pkgconfig/stdr_launchers.pc /home/timur/mkr_tm_ws/devel/lib/pkgconfig/stdr_launchers.pc

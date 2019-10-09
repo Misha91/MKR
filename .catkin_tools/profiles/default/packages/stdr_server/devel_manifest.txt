@@ -1,0 +1,10 @@
+stdr_simulator/stdr_server
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/cmake.lock /home/timur/mkr_tm_ws/devel/./cmake.lock
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/share/stdr_server/cmake/stdr_serverConfig.cmake /home/timur/mkr_tm_ws/devel/share/stdr_server/cmake/stdr_serverConfig.cmake
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/share/stdr_server/cmake/stdr_serverConfig-version.cmake /home/timur/mkr_tm_ws/devel/share/stdr_server/cmake/stdr_serverConfig-version.cmake
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/libstdr_map_loader.so /home/timur/mkr_tm_ws/devel/lib/libstdr_map_loader.so
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/libstdr_server.so /home/timur/mkr_tm_ws/devel/lib/libstdr_server.so
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/libstdr_map_server.so /home/timur/mkr_tm_ws/devel/lib/libstdr_map_server.so
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/pkgconfig/stdr_server.pc /home/timur/mkr_tm_ws/devel/lib/pkgconfig/stdr_server.pc
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/stdr_server/stdr_server_node /home/timur/mkr_tm_ws/devel/lib/stdr_server/stdr_server_node
+/home/timur/mkr_tm_ws/devel/.private/stdr_server/lib/stdr_server/load_map /home/timur/mkr_tm_ws/devel/lib/stdr_server/load_map

@@ -1,0 +1,7 @@
+Symlinking /home/timur/mkr_tm_ws/devel/share/roseus/ros/motion/manifest.l
+Symlinking /home/timur/mkr_tm_ws/devel/share/motion/cmake/motionConfig-version.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/motion/cmake/motionConfig.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/motion/cmake/motion-msg-paths.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/share/motion/cmake/motion-msg-extras.cmake
+Symlinking /home/timur/mkr_tm_ws/devel/lib/pkgconfig/motion.pc
+Symlinking /home/timur/mkr_tm_ws/devel/lib/python2.7/dist-packages/motion/__init__.py

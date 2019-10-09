@@ -14,6 +14,7 @@ class Robot(object):
         else:
             self.start_pose = start
             self.goal_pose = goal
+        self.waypoint = []
 
     def reset(self):
         prev_name = self.name

@@ -12,6 +12,7 @@ def insort(list, node, lo = 0, hi= None):
             hi = mid
         else: lo = mid+1
     list.insert(lo, node)
+    return list
 
 def manhattan_dist(start, goal):
     dist = abs(goal[0]-start[0])+abs(goal[1]-start[1])

@@ -12,7 +12,7 @@ def plan(map, start, goal):
         x_bound = map.shape[0]
         y_bound = map.shape[1]
         occupancy_threshold = 0
-
+        
         if goal[0]<0 or goal[0]>x_bound:
             raise Exception("Goal is out of x bound")
         if goal[1]<0 or goal[1]>y_bound:

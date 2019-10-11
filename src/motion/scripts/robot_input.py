@@ -12,6 +12,8 @@ import numpy as np
 from scipy.ndimage import morphology
 import skimage.measure
 
+
+
 print("We started")
 path = os.getcwd()
 robots = []
@@ -47,34 +49,34 @@ with open(path + '/src/motion/data/robot_data.csv', mode='w') as robot_file:
 #    robot_list.append(tmp)
 #    print("Robot:", robot.name,"Position:", robot.start_pose, "Goal:", robot.goal_pose)
 
-"""Getting map"""
-rospy.init_node("path_planner")
-init_map = rospy.wait_for_message("/map", OccupancyGrid)
-#print(init_map)
-map = np.reshape(init_map.data, (init_map.info.height, init_map.info.width)).T
-map = skimage.measure.block_reduce(map, (20,20), np.max)
-print(map.shape)
-
 """Print robot data"""
 for robot in robots:
     print(robot.name,robot.start_pose, robot.goal_pose)
 
+"""Getting map"""
+rospy.init_node("path_planner")
+init_map = rospy.wait_for_message("/map", OccupancyGrid)
+map = np.reshape(init_map.data, (init_map.info.height, init_map.info.width)).T
+map = skimage.measure.block_reduce(map, (20,20), np.max)
+print(map.shape)
 
-#self.grid = (morphology.grey_dilation(self.grid, size=(3,3)))
+"""Planning"""
+#self.grid = (morphology.grey_dilation(self.grid, size=(3,3))) ------ DONE
 #robot_list_updated = plan(map, robot_list)
-print(robots[0].start_pose[:2])
-print(robots[0].goal_pose)
-robot_path = plan(map, robots[0].start_pose[:2],robots[0].goal_pose)
-print("Robot zero path")
+
+morph_size = 3
+
+morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
+robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
+print("Robot path")
 print(robot_path)
 
-
 """PRINTING OF MAP"""
+
 for j in (reversed(range(map.shape[1]))):
     str = ""
     for i in range(map.shape[0]):
         if (map[i][j] >0) or ([i,j] in robot_path): str += "#"
         else: str += " "
     print(str)
-print(map[10][30])
 print("UPDATED")

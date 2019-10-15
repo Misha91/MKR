@@ -31,8 +31,6 @@ def plan(map, start, goal):
         init_dist = manhattan_dist(start,goal)
         start_node = [init_dist, start, [start]]
         new_parent = start_node
-        visited_nodes.append(new_parent)
-        visited_poses.append(new_parent[1])
 
         """node iterations"""
         while(new_parent[1]!=goal):
@@ -60,8 +58,6 @@ def plan(map, start, goal):
                     continue
 
                 ### not considered before ###
-                #if new_node[1] in visited_poses:
-                #    continue
 
                 if new_node[1] in priority_poses and len(new_node[2]) in priority_lens:
                     continue
@@ -72,11 +68,7 @@ def plan(map, start, goal):
                 priority_lens.append(len(new_node[2]))
 
             """selection of new parent node"""
-            print(new_parent[1])
             new_parent = priority_queue[0]
-
-            # visited_nodes.append(new_parent)
-            # visited_poses.append(new_parent[1])
 
             priority_queue.pop(0)
             priority_poses.pop(priority_poses.index(new_parent[1]))

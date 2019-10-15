@@ -14,6 +14,9 @@ class Robot(object):
         else:
             self.start_pose = start
             self.goal_pose = goal
+        self.priority_queue = []
+        self.priority_poses = []
+        self.priority_lens = []
         self.waypoint = []
 
     def reset(self):

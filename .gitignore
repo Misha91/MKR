@@ -1,6 +1,7 @@
 *.pyc
 build/
 devel/
+logs/
 src/stdr_simulator
 src/turtlebot_simulator
 

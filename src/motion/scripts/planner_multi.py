@@ -3,10 +3,14 @@
 from planner import plan
 from scipy.ndimage import morphology
 from utils import manhattan_dist
+import numpy as np
 # input list of robot objects with their start position and goal position
 # output list of waypoints for each robot
 
 def multi_plan(map,robots):
+
+    map_init = np.copy(map)
+
     list_of_directions = [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,0]]
 
     x_bound = map.shape[0]
@@ -23,31 +27,65 @@ def multi_plan(map,robots):
 
         start = robot.start_pose
         goal = robot.goal_pose
-        map[start[0]][start[1]] = 100
-
+        map_init[start[0]][start[1]] = 100
 
         if goal[0]<0 or goal[0]>x_bound:
             raise Exception("Goal of robot {} is out of x bound".format(robot.name))
         if goal[1]<0 or goal[1]>y_bound:
             raise Exception("Goal of robot {} is out of y bound".format(robot.name))
-        if map[goal[0]][goal[1]]>occupancy_threshold:
+        if map_init[goal[0]][goal[1]]>occupancy_threshold:
             raise Exception("Goal of robot {} is occupied".format(robot.name))
-        if map[goal[0]][goal[1]]<0:
+        if map_init[goal[0]][goal[1]]<0:
             raise Exception("Goal of robot {} is in unexplored region".format(robot.name))
         goals.append(goal)
 
         """initialization"""
         init_dist = manhattan_dist(start,goal)
-        start_nodes.append([init_dist, start, [start]])
-        new_parents.append(start_node)
+        robot.start_node = [init_dist, start, [start]]
+        robot.new_parent = robot.start_node
+
+    map_init = morphology.grey_dilation(map_init, size=(3,3))
+    map_now = np.copy(map_init)
 
     while(finished == False):
-        pass
+        for i,robot in enumerate(robots):
 
-    map = morphology.grey_dilation(map, size=(3,3))
+            parent_pose = new_parents[i][1]
+            parent_path = new_parents[i][2]
+            ### creating new nodes
+            for x in list_of_directions:
+                """node creation"""
+                history = list(parent_path) + [[parent_pose[0]+x[0],parent_pose[1]+x[1]]]
+                new_node = [manhattan_dist([parent_pose[0]+x[0],parent_pose[1]+x[1]], goal) + len(history), #D
+                                [parent_pose[0]+x[0],parent_pose[1]+x[1]], # new pose
+                                history #path
+                                ]
+                """filtering"""
+                ### within map bounds ###
+                if new_node[1][0]<0 or new_node[1][0]>x_bound:
+                    continue
+                if new_node[1][1]<0 or new_node[1][1]>y_bound:
+                    continue
+                ### not occupied ###
+                if map_now[new_node[1][0]][new_node[1][1]]>occupancy_threshold:
+                    continue
+                ### not considered before ###
+                if new_node[1] in robot.priority_poses and len(new_node[2]) in robot.priority_lens:
+                    continue
+
+                """adding to queue"""
+                robot.priority_queue = insort(robot.priority_queue, new_node)
+                robot.priority_poses.append(new_node[1])
+                robot.priority_lens.append(len(new_node[2]))
+
+            """selection of new parent node"""
+            new_parent = robot.priority_queue[0]
+
+            robot.priority_queue.pop(0)
+            robot.priority_poses.pop(priority_poses.index(new_parent[1]))
+            robot.priority_lens.pop(len(new_parent[2]))
 
 
-    ### map object is changed simultaniously in robot_input too, idk why?###
 
 
-    return map
+    return map_init

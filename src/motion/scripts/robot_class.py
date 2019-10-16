@@ -17,6 +17,8 @@ class Robot(object):
         self.priority_queue = []
         self.priority_poses = []
         self.priority_lens = []
+        self.start_node = []
+        self.new_parent = []
         self.waypoint = []
 
     def reset(self):

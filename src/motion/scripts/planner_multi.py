@@ -22,12 +22,14 @@ def multi_plan(map,robots):
 
     start_nodes = []
     new_parents = []
+    robot_fin = []
 
     for robot in robots:
 
         start = robot.start_pose
         goal = robot.goal_pose
         map_init[start[0]][start[1]] = 100
+        robot_fin.append(robot.is_finished)
 
         if goal[0]<0 or goal[0]>x_bound:
             raise Exception("Goal of robot {} is out of x bound".format(robot.name))
@@ -44,8 +46,9 @@ def multi_plan(map,robots):
         robot.start_node = [init_dist, start, [start]]
         robot.new_parent = robot.start_node
 
-    map_init = morphology.grey_dilation(map_init, size=(3,3))
+
     map_now = np.copy(map_init)
+    map_now = morphology.grey_dilation(map_now, size=(3,3))
 
     while(finished == False):
         for i,robot in enumerate(robots):
@@ -79,11 +82,30 @@ def multi_plan(map,robots):
                 robot.priority_lens.append(len(new_node[2]))
 
             """selection of new parent node"""
-            new_parent = robot.priority_queue[0]
+            robot.new_parent = robot.priority_queue[0]
 
             robot.priority_queue.pop(0)
-            robot.priority_poses.pop(priority_poses.index(new_parent[1]))
-            robot.priority_lens.pop(len(new_parent[2]))
+            robot.priority_poses.pop(priority_poses.index(robot.new_parent[1]))
+            robot.priority_lens.pop(len(robot.new_parent[2]))
+
+            """if finished"""
+            if robot.new_parent[1]==robot.goal_pose:
+                robot.is_finished = True
+
+        """update map"""
+        # clear map
+        map_now = np.copy(map_init)
+        # insert robots
+        for i,robot in enumerate(robots):
+            map_now[robot.new_parent[1][0]][new_parent[1][1]] = 100
+        # morph
+        map_now = morphology.grey_dilation(map_now, size=(3,3))
+
+        if all(robot_fin) == True:
+            finished = True
+
+
+
 
 
 

@@ -33,7 +33,12 @@ class Robot(object):
         self.priority_queue = []
         self.priority_poses = []
         self.priority_lens = []
+        self.start_node = []
+        self.new_parent = []
+        self.is_finished = False
         self.waypoint = []
+
+        self.map = []
         self.wp_iter = 1
         tmp_init = self.gridToCoord(self.goal_pose[0],self.goal_pose[1])
         self.goalFinal = Point(tmp_init[0], tmp_init[1], 0)

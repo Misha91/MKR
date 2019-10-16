@@ -24,9 +24,11 @@ def multi_plan(map,robots):
         new_parents = []
         robot_fin = []
 
+        finished = False
+        list_of_maps = []
         for robot in robots:
 
-            start = robot.start_pose
+            start = robot.start_pose[:2]
             goal = robot.goal_pose
             map_init[start[0]][start[1]] = 100
             robot_fin.append(robot.is_finished)
@@ -48,11 +50,20 @@ def multi_plan(map,robots):
 
         """ map with starting positions"""
         map_now = np.copy(map_init)
-        map_now = morphology.grey_dilation(map_now, size=(3,3))
+
+        for robot in robots:
+            map_other_robots = np.copy(map_now)
+            start = robot.start_pose[:2]
+            map_other_robots[start[0]][start[1]] = 0
+            robot.map = np.copy(map_other_robots)
+            robot.map = morphology.grey_dilation(robot.map, size=(3,3))
 
         while(finished == False):
-            for robot in robots:
-                if robot.is_finished == Fales:
+
+            for i,robot in enumerate(robots):
+
+                if robot.is_finished == False:
+
                     parent_pose = robot.new_parent[1]
                     parent_path = robot.new_parent[2]
                     ### creating new nodes
@@ -63,51 +74,64 @@ def multi_plan(map,robots):
                                         [parent_pose[0]+x[0],parent_pose[1]+x[1]], # new pose
                                         history #path
                                         ]
+                        # print(robot.priority_queue)
                         """filtering"""
                         ### within map bounds ###
                         if new_node[1][0]<0 or new_node[1][0]>x_bound:
                             continue
                         if new_node[1][1]<0 or new_node[1][1]>y_bound:
                             continue
+
                         ### not occupied ###
-                        if map_now[new_node[1][0]][new_node[1][1]]>occupancy_threshold:
+
+                        if robot.map[new_node[1][0]][new_node[1][1]]>occupancy_threshold:
                             continue
+
                         ### not considered before ###
                         if new_node[1] in robot.priority_poses and len(new_node[2]) in robot.priority_lens:
                             continue
 
                         """adding to queue"""
-                        robot.priority_queue = insort(robot.priority_queue, new_node)
-                        robot.priority_poses.append(new_node[1])
-                        robot.priority_lens.append(len(new_node[2]))
+                        if len(new_node)>0:
+                            robot.priority_queue = insort(robot.priority_queue, new_node)
+                            robot.priority_poses.append(new_node[1])
+                            robot.priority_lens.append(len(new_node[2]))
 
                     """selection of new parent node"""
+
                     robot.new_parent = robot.priority_queue[0]
 
                     robot.priority_queue.pop(0)
-                    robot.priority_poses.pop(priority_poses.index(robot.new_parent[1]))
+                    robot.priority_poses.pop(robot.priority_poses.index(robot.new_parent[1]))
                     robot.priority_lens.pop(len(robot.new_parent[2]))
-
+                    print(robot.new_parent)
                 """if finished"""
                 if robot.new_parent[1]==robot.goal_pose:
+                    # print("working")
                     robot.is_finished = True
-                    robot.waypoints = robot.new_parent[2]
+                    robot_fin[i] = True
+                    robot.waypoint = robot.new_parent[2]
+                robot_x = robot.new_parent[1][0]
+                robot_y = robot.new_parent[1][1]
+                map_now[robot_x][robot_y] = 100
+                """update map"""
 
-            """update map"""
             # clear map
             map_now = np.copy(map_init)
             # insert robots
             for robot in robots:
                 map_now[robot.new_parent[1][0]][robot.new_parent[1][1]] = 100
             # morph
-            map_now = morphology.grey_dilation(map_now, size=(3,3))
+            for robot in robots:
+                map_other_robots = np.copy(map_now)
+                pose = robot.new_parent[1]
+                map_other_robots[pose[0]][pose[1]] = 0
+                robot.map = np.copy(map_other_robots)
+                robot.map = morphology.grey_dilation(robot.map, size=(3,3))
 
-            """check if finished"""
+            finished = all(x == True for x in robot_fin)
 
-            if all(robot_fin) == True:
-                finished = True
-
-        return True
+        return robots
     except Exception as e:
         print(e)
         return False

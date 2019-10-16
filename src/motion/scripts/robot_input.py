@@ -12,9 +12,9 @@ from nav_msgs.msg import OccupancyGrid
 import numpy as np
 from scipy.ndimage import morphology
 import skimage.measure
+from matplotlib import colors
 
-
-
+import matplotlib.pyplot as plt
 print("We started")
 path = os.getcwd()
 robots = []
@@ -63,21 +63,47 @@ print(map.shape)
 # print(map)
 """Planning"""
 
-morph_size = 3
+# morph_size = 3
 
-morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
-robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
-print("Robot path")
-print(robot_path)
+# morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
+# robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
+# print("Robot path")
+# print(robot_path)
+list_of_pathes = []
+new_robots = multi_plan(map, robots)
+for robot in new_robots:
+     print(robot.waypoint)
+     list_of_pathes.append(robot.waypoint)
 
-#map = multi_plan(map, robots)
-"""PRINTING OF MAP"""
+list_of_pathes.sort(lambda x,y: len(x) < len(y))
 
-for j in (reversed(range(map.shape[1]))):
-    str = ""
-    for i in range(map.shape[0]):
-        if (map[i][j] >0) or ([i,j] in robot_path):
-            str += "#"
-        else: str += " "
-    print(str)
-print("UPDATED")
+plt.ion()
+plt.show()
+p = []
+cmap = colors.ListedColormap(['white','black'])
+for i in range(len(list_of_pathes[0])):
+    new_map = np.copy(map)
+    # if i < len(list_of_pathes[-1]):
+    #     for robot in new_robots:
+    #         p[robot.waypoint[i][0]][robot.waypoint[i][1]] = 100
+    # plt.plot(list_of_pathes[0][i][0],list_of_pathes[0][i][1],'bo')
+    # plt.plot(list_of_pathes[1][i][0],list_of_pathes[1][i][1],'r+')
+
+
+    if i < len(list_of_pathes[-1]):
+        new_map[list_of_pathes[1][i][0]][list_of_pathes[1][i][1]]= 100
+    new_map[list_of_pathes[0][i][0],list_of_pathes[0][i][1]] = 100
+    plt.imshow(new_map,cmap = cmap)
+
+    plt.pause(0.5)
+
+# """PRINTING OF MAP"""
+#
+# for j in (reversed(range(map.shape[1]))):
+#     str = ""
+#     for i in range(map.shape[0]):
+#         if (map[i][j] >0) or ([i,j] in robot_path):
+#             str += "#"
+#         else: str += " "
+#     print(str)
+# print("UPDATED")

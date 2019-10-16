@@ -21,6 +21,7 @@ class Robot(object):
         self.new_parent = []
         self.is_finished = False
         self.waypoint = []
+        self.map = []
 
     def reset(self):
         prev_name = self.name

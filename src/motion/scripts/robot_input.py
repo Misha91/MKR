@@ -63,21 +63,20 @@ print(map.shape)
 # print(map)
 """Planning"""
 
-# morph_size = 3
+morph_size = 3
 
-# morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
-# robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
-# print("Robot path")
-# print(robot_path)
+morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
+robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
+print("Robot path")
+print(robot_path)
 
-map = multi_plan(map, robots)
+#map = multi_plan(map, robots)
 """PRINTING OF MAP"""
 
 for j in (reversed(range(map.shape[1]))):
     str = ""
     for i in range(map.shape[0]):
-        if (map[i][j] >0):
-            """or ([i,j] in robot_path):"""
+        if (map[i][j] >0) or ([i,j] in robot_path):
             str += "#"
         else: str += " "
     print(str)

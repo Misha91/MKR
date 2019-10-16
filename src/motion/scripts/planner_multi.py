@@ -42,7 +42,7 @@ def multi_plan(map,robots):
         new_parents.append(start_node)
 
     while(finished == False):
-        
+        pass
 
     map = morphology.grey_dilation(map, size=(3,3))
 

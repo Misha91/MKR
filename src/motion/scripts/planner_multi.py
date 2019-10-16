@@ -46,12 +46,12 @@ def multi_plan(map,robots):
             robot.start_node = [init_dist, start, [start]]
             robot.new_parent = robot.start_node
 
-
+        """ map with starting positions"""
         map_now = np.copy(map_init)
         map_now = morphology.grey_dilation(map_now, size=(3,3))
 
         while(finished == False):
-            for robot in enumerate(robots):
+            for robot in robots:
                 if robot.is_finished == Fales:
                     parent_pose = robot.new_parent[1]
                     parent_path = robot.new_parent[2]

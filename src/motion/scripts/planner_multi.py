@@ -97,7 +97,7 @@ def multi_plan(map,robots):
             # clear map
             map_now = np.copy(map_init)
             # insert robots
-            for i,robot in enumerate(robots):
+            for robot in robots:
                 map_now[robot.new_parent[1][0]][robot.new_parent[1][1]] = 100
             # morph
             map_now = morphology.grey_dilation(map_now, size=(3,3))

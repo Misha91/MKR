@@ -80,7 +80,7 @@ print(robots[1].waypoint)
 robot_path = robots[1].waypoint
 
 #map = multi_plan(map, robots)
-"""PRINTING OF MAP"""
+#PRINTING OF MAP
 
 for j in (reversed(range(map.shape[1]))):
     str = ""

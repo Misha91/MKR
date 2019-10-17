@@ -18,25 +18,10 @@ def manhattan_dist(start, goal):
     dist = abs(goal[0]-start[0])+abs(goal[1]-start[1])
     return dist
 
-#test insort
-"""
-list = [1,2,3,5,6,7]
-insort(list,6.5)
-print(list)
-"""
-# test data sort
-"""
-node1 =[5,3.0,0.0]
-node2 = [6,1.0,1.0]
-node3 = [2, 1.5,2.5]
-
-data = [node1, node2, node3]
-print(data)
-data.sort(key = lambda r:r[0])
-print(data)
-"""
-"""
-list = []
-insort(list,1)
-print(list)
-"""
+def obtain_rank(lst):
+    sorted_data = [(value,i) for i,value in enumerate(lst)]
+    sorted_data = sorted(sorted_data)
+    ranked_list = [0]*len(lst)
+    for i,(_,ind) in enumerate(sorted_data):
+        ranked_list[ind] = i
+    return ranked_list

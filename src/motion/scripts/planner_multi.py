@@ -1,137 +1,61 @@
-#!/usr/bin/env python
-
-from planner import plan
+from a_star import plan_a_star, plan_a_star_3D
 from scipy.ndimage import morphology
-from utils import manhattan_dist, insort
+from utils import obtain_rank
 import numpy as np
-# input list of robot objects with their start position and goal position
-# output list of waypoints for each robot
 
 def multi_plan(map,robots):
-    try:
-        map_init = np.copy(map)
+### The function takes map and robot objects to plan them and returns
+### them with their paths at their corresponding waypoint parameter
 
-        list_of_directions = [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1],[0,0]]
 
-        x_bound = map.shape[0]
-        y_bound = map.shape[1]
-        occupancy_threshold = 0
+    morph_size = 3
+    morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
+    rob_paths = []
+# A star for all robots, to find the shortest path
+    for robot in robots:
+        path = plan_a_star(morph_map, robot.start_pose, robot.goal_pose)
+        rob_paths.append(path)
+    rob_paths_lens = [len(x) for x in rob_paths]
+    rob_ranks = obtain_rank(rob_paths_lens)
 
-        cur_pos_robots = []
-        goals = []
+# define robot and his path
 
-        start_nodes = []
-        new_parents = []
-        robot_fin = []
+    main_rob_index = rob_ranks.index(0)
+    main_rob_path = rob_paths[main_rob_index]
+    # send the path to main robot
+    robots[main_rob_index].waypoint = main_rob_path
 
-        finished = False
-        list_of_maps = []
-        for robot in robots:
+# prepare map for next robots
 
-            start = robot.start_pose[:2]
-            goal = robot.goal_pose
-            map_init[start[0]][start[1]] = 100
-            robot_fin.append(robot.is_finished)
+    map_to_pass = np.array([map])
+    map_to_save = np.array([map])
 
-            if goal[0]<0 or goal[0]>x_bound:
-                raise Exception("Goal of robot {} is out of x bound".format(robot.name))
-            if goal[1]<0 or goal[1]>y_bound:
-                raise Exception("Goal of robot {} is out of y bound".format(robot.name))
-            if map_init[goal[0]][goal[1]]>occupancy_threshold:
-                raise Exception("Goal of robot {} is occupied".format(robot.name))
-            if map_init[goal[0]][goal[1]]<0:
-                raise Exception("Goal of robot {} is in unexplored region".format(robot.name))
-            goals.append(goal)
+    for i,pose in enumerate(main_rob_path):
+        temp_map = np.copy(map)
+        temp_map[pose[0]][pose[1]] = 100
+        temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size,morph_size))
+        map_to_pass = np.append(map_to_pass,[temp_map_morph],axis=0)
+        map_to_save = np.append(map_to_save,[temp_map],axis=0)
 
-            """initialization"""
-            init_dist = manhattan_dist(start,goal)
-            robot.start_node = [init_dist, start, [start]]
-            robot.new_parent = robot.start_node
+# Planning of next robots using modified A *
 
-        """ map with starting positions"""
-        map_now = np.copy(map_init)
+    for i in range(len(rob_ranks)):
+        if (i == 0): continue
+        #define
+        cur_rob_index = rob_ranks.index(i)
+        cur_rob_path, extension = plan_a_star_3D(map_to_pass, robots[cur_rob_index].start_pose, robots[cur_rob_index].goal_pose)
+        robots[cur_rob_index].waypoint = cur_rob_path
+        #prepare
+        for j in range(extension):
+            temp_map = np.copy(map_to_save[-1,:,:])
+            map_to_save = np.append(map_to_save,[temp_map],axis =0)
 
-        for robot in robots:
-            map_other_robots = np.copy(map_now)
-            start = robot.start_pose[:2]
-            map_other_robots[start[0]][start[1]] = 0
-            robot.map = np.copy(map_other_robots)
-            robot.map = morphology.grey_dilation(robot.map, size=(3,3))
+        for j,pose in enumerate(cur_rob_path):
+            map_to_save[j+1,pose[0],pose[1]]=100
 
-        while(finished == False):
+        map_to_pass = np.copy(map_to_save)
+        for j in range(map_to_pass.shape[0]):
+            temp_map_morph = morphology.grey_dilation(map_to_pass[j,:,:],size=(morph_size,morph_size))
+            map_to_pass[j,:,:] = np.copy(temp_map)
 
-            for i,robot in enumerate(robots):
-
-                if robot.is_finished == False:
-
-                    parent_pose = robot.new_parent[1]
-                    parent_path = robot.new_parent[2]
-                    ### creating new nodes
-                    for x in list_of_directions:
-                        """node creation"""
-                        history = list(parent_path) + [[parent_pose[0]+x[0],parent_pose[1]+x[1]]]
-                        new_node = [manhattan_dist([parent_pose[0]+x[0],parent_pose[1]+x[1]], goal) + len(history), #D
-                                        [parent_pose[0]+x[0],parent_pose[1]+x[1]], # new pose
-                                        history #path
-                                        ]
-                        # print(robot.priority_queue)
-                        """filtering"""
-                        ### within map bounds ###
-                        if new_node[1][0]<0 or new_node[1][0]>x_bound:
-                            continue
-                        if new_node[1][1]<0 or new_node[1][1]>y_bound:
-                            continue
-
-                        ### not occupied ###
-
-                        if robot.map[new_node[1][0]][new_node[1][1]]>occupancy_threshold:
-                            continue
-
-                        ### not considered before ###
-                        if new_node[1] in robot.priority_poses and len(new_node[2]) in robot.priority_lens:
-                            continue
-
-                        """adding to queue"""
-                        if len(new_node)>0:
-                            robot.priority_queue = insort(robot.priority_queue, new_node)
-                            robot.priority_poses.append(new_node[1])
-                            robot.priority_lens.append(len(new_node[2]))
-
-                    """selection of new parent node"""
-
-                    robot.new_parent = robot.priority_queue[0]
-
-                    robot.priority_queue.pop(0)
-                    robot.priority_poses.pop(robot.priority_poses.index(robot.new_parent[1]))
-                    robot.priority_lens.pop(len(robot.new_parent[2]))
-                    print(robot.new_parent)
-                """if finished"""
-                if robot.new_parent[1]==robot.goal_pose:
-                    # print("working")
-                    robot.is_finished = True
-                    robot_fin[i] = True
-                    robot.waypoint = robot.new_parent[2]
-                robot_x = robot.new_parent[1][0]
-                robot_y = robot.new_parent[1][1]
-                map_now[robot_x][robot_y] = 100
-                """update map"""
-
-            # clear map
-            map_now = np.copy(map_init)
-            # insert robots
-            for robot in robots:
-                map_now[robot.new_parent[1][0]][robot.new_parent[1][1]] = 100
-            # morph
-            for robot in robots:
-                map_other_robots = np.copy(map_now)
-                pose = robot.new_parent[1]
-                map_other_robots[pose[0]][pose[1]] = 0
-                robot.map = np.copy(map_other_robots)
-                robot.map = morphology.grey_dilation(robot.map, size=(3,3))
-
-            finished = all(x == True for x in robot_fin)
-
-        return robots
-    except Exception as e:
-        print(e)
-        return False
+    return robots

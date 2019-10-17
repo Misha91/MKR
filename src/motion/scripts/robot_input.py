@@ -101,33 +101,34 @@ robots[1].goToFinalGoal()
 # robot_path = plan(morph_map, robots[0].start_pose[:2],robots[0].goal_pose)
 # print("Robot path")
 # print(robot_path)
-list_of_pathes = []
-new_robots = multi_plan(map, robots)
-for robot in new_robots:
-     print(robot.waypoint)
-     list_of_pathes.append(robot.waypoint)
-
-list_of_pathes.sort(lambda x,y: len(x) < len(y))
-
-plt.ion()
-plt.show()
-p = []
-cmap = colors.ListedColormap(['white','black'])
-for i in range(len(list_of_pathes[0])):
-    new_map = np.copy(map)
-    # if i < len(list_of_pathes[-1]):
-    #     for robot in new_robots:
-    #         p[robot.waypoint[i][0]][robot.waypoint[i][1]] = 100
-    # plt.plot(list_of_pathes[0][i][0],list_of_pathes[0][i][1],'bo')
-    # plt.plot(list_of_pathes[1][i][0],list_of_pathes[1][i][1],'r+')
-
-
-    if i < len(list_of_pathes[-1]):
-        new_map[list_of_pathes[1][i][0]][list_of_pathes[1][i][1]]= 100
-    new_map[list_of_pathes[0][i][0],list_of_pathes[0][i][1]] = 100
-    plt.imshow(new_map,cmap = cmap)
-
-    plt.pause(0.5)
+#
+# list_of_pathes = []
+# new_robots = multi_plan(map, robots)
+# for robot in new_robots:
+#      print(robot.waypoint)
+#      list_of_pathes.append(robot.waypoint)
+#
+# list_of_pathes.sort(lambda x,y: len(x) < len(y))
+#
+# plt.ion()
+# plt.show()
+# p = []
+# cmap = colors.ListedColormap(['white','black'])
+# for i in range(len(list_of_pathes[0])):
+#     new_map = np.copy(map)
+#     # if i < len(list_of_pathes[-1]):
+#     #     for robot in new_robots:
+#     #         p[robot.waypoint[i][0]][robot.waypoint[i][1]] = 100
+#     # plt.plot(list_of_pathes[0][i][0],list_of_pathes[0][i][1],'bo')
+#     # plt.plot(list_of_pathes[1][i][0],list_of_pathes[1][i][1],'r+')
+#
+#
+#     if i < len(list_of_pathes[-1]):
+#         new_map[list_of_pathes[1][i][0]][list_of_pathes[1][i][1]]= 100
+#     new_map[list_of_pathes[0][i][0],list_of_pathes[0][i][1]] = 100
+#     plt.imshow(new_map,cmap = cmap)
+#
+#     plt.pause(0.5)
 
 # """PRINTING OF MAP"""
 #
@@ -139,3 +140,9 @@ for i in range(len(list_of_pathes[0])):
 #         else: str += " "
 #     print(str)
 # print("UPDATED")
+""" MULTI-PLANNING """
+# input: map, robot list
+# output robot list with modified self.waypoint
+planned_robots = multi_plan(map,robots)
+for robot in planned_robots:
+    print(robot.waypoint)

@@ -1,5 +1,8 @@
 # mkr_tm_ws
-*NOT IN PROGRESS*  
+*NOT IN PROGRESS* 
+
+<b>roslaunch motion start.launch</b>
+
 <br/>
 <b>To-do list and status:  </b>
 <br/>

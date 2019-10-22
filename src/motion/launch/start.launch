@@ -1,0 +1,6 @@
+<launch>
+    <!-- Feel free to add some command line arguments and parameters -->
+    <include file="$(find simulator_e130)/launch/simulator.launch"/>
+    <include file="$(find robot_coordination)/launch/contr.launch"/>
+    <node name="planner" pkg="motion" type="robot_input.py" output="screen" cwd="node" />
+</launch>

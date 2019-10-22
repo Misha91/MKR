@@ -5,6 +5,7 @@ import rospy
 from robot_class import Robot
 import sys
 import os
+import subprocess
 from planner import plan
 from planner_multi import multi_plan
 
@@ -16,11 +17,12 @@ from matplotlib import colors
 
 import matplotlib.pyplot as plt
 print("We started")
-path = os.getcwd()
-robots = []
-if (path.split('/')[-1] != 'mkr_tm_ws'):
-    path += '/mkr_tm_ws'
 
+path = (subprocess.check_output("cd ../data; pwd", shell=True)).rstrip()
+
+robots = []
+
+print(path)
 rospy.init_node("path_planner")
 
 """Getting map"""
@@ -35,7 +37,7 @@ print(map.shape)
 
 """Reading initial positions and goals of robots"""
 
-with open(path + '/src/motion/data/robot_start_positions.csv', mode='r') as csv_file:
+with open(path + '/robot_start_positions.csv', mode='r') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter = ',')
     for i,row in enumerate(csv_reader):
         if (i == 0): continue
@@ -46,7 +48,7 @@ with open(path + '/src/motion/data/robot_start_positions.csv', mode='r') as csv_
 
 """Writing data file with names"""
 
-with open(path + '/src/motion/data/robot_data.csv', mode='w') as robot_file:
+with open(path + '/robot_data.csv', mode='w') as robot_file:
     robot_writer = csv.writer(robot_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     for robot in robots:
 
@@ -146,3 +148,4 @@ robots[1].goToFinalGoal()
 planned_robots = multi_plan(map,robots)
 for robot in planned_robots:
     print(robot.waypoint)
+    robot.startMoving()

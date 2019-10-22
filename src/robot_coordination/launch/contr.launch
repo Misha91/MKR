@@ -1,0 +1,5 @@
+<launch>
+   
+    <node name="contr0" pkg="robot_coordination" type="robot_node" ns = "/robot0"/>
+    <node name="contr1" pkg="robot_coordination" type="robot_node" ns = "/robot1"/>
+</launch>

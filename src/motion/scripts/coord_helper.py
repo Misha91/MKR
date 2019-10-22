@@ -11,14 +11,6 @@ from robot_coordination.srv import StartMovement
 from robot_coordination.srv import StopMovement
 import rospy
 
-# Trajectory as a tuple of (x, y, time)
-g_trajectory = (
-    (1.8, 6.6, 0),
-    (2.8, 6.6, 4),
-    (2.8, 7.6, 8),
-    (1.8, 7.6, 12),
-    (1.8, 6.6, 16),
-)
 
 
 def wait_for_service(server_ns, srv_name):
@@ -87,43 +79,3 @@ def add_path(server_ns, trajectory):
     except rospy.ServiceException as e:
         rospy.logerr('Service call failed: {}'.format(e))
     return False
-
-
-def main():
-    rospy.init_node('example_robot_control')
-
-    server_ns_parameter_name = '~server_namespace'
-    print(server_ns_parameter_name)
-    try:
-        server_ns = rospy.get_param(server_ns_parameter_name)
-        print(server_ns)
-    except KeyError:
-        rospy.logerr('Parameter {} must be set'.format(
-            rospy.resolve_name(server_ns_parameter_name)))
-        return
-
-    if not add_path(server_ns, g_trajectory):
-        rospy.logerr('Could not add path, exiting')
-        return
-    rospy.loginfo('Path added')
-
-    if not start_movement(server_ns):
-        rospy.logerr('Could not start motion, exiting')
-        return
-    rospy.loginfo('Movement started')
-
-    time.sleep(20)
-
-    if not stop_movement(server_ns):
-        rospy.logerr('Could not stop motion, exiting')
-        return
-    rospy.loginfo('Movement stopped')
-
-    if not add_path(server_ns, []):
-        rospy.logerr('Could not clear path, exiting')
-        return
-    rospy.loginfo('Path cleared')
-
-
-if __name__ == '__main__':
-    main()

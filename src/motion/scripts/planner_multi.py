@@ -10,6 +10,7 @@ def multi_plan(map,robots):
 
     morph_size = 3
     morph_size_rob = 7
+    morph_coef = 25
     morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
     rob_paths = []
 # A star for all robots, to find the shortest path
@@ -35,7 +36,7 @@ def multi_plan(map,robots):
     for i,pose in enumerate(main_rob_path):
         temp_map = np.copy(empty_map)
         temp_map[pose[0]][pose[1]] = 100
-        temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob,morph_size_rob))
+        temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob+int(i/morph_coef),morph_size_rob+int(i/morph_coef)))
 
         map_to_pass = np.append(map_to_pass,[temp_map_morph+morph_map],axis=0)
         map_to_save = np.append(map_to_save,[temp_map+map],axis=0)
@@ -57,7 +58,7 @@ def multi_plan(map,robots):
         for j,pose in enumerate(cur_rob_path):
             temp_map = np.copy(empty_map)
             temp_map[pose[0]][pose[1]] = 100
-            temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob,morph_size_rob))
+            temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob+int(j/morph_coef),morph_size_rob+int(j/morph_coef)))
 
             map_to_pass[j+1,:,:] = np.copy(temp_map_morph+map)
             map_to_save[j+1,pose[0],pose[1]]=100

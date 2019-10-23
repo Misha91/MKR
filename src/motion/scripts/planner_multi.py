@@ -9,6 +9,7 @@ def multi_plan(map,robots):
 
 
     morph_size = 3
+    morph_size_rob = 7
     morph_map = morphology.grey_dilation(map, size=(morph_size,morph_size))
     rob_paths = []
 # A star for all robots, to find the shortest path
@@ -29,13 +30,15 @@ def multi_plan(map,robots):
 
     map_to_pass = np.array([map])
     map_to_save = np.array([map])
+    empty_map = np.zeros((map.shape[0],map.shape[1]))
 
     for i,pose in enumerate(main_rob_path):
-        temp_map = np.copy(map)
+        temp_map = np.copy(empty_map)
         temp_map[pose[0]][pose[1]] = 100
-        temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size,morph_size))
-        map_to_pass = np.append(map_to_pass,[temp_map_morph],axis=0)
-        map_to_save = np.append(map_to_save,[temp_map],axis=0)
+        temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob,morph_size_rob))
+
+        map_to_pass = np.append(map_to_pass,[temp_map_morph+morph_map],axis=0)
+        map_to_save = np.append(map_to_save,[temp_map+map],axis=0)
 
 # Planning of next robots using modified A *
 
@@ -50,12 +53,17 @@ def multi_plan(map,robots):
             temp_map = np.copy(map_to_save[-1,:,:])
             map_to_save = np.append(map_to_save,[temp_map],axis =0)
 
+        map_to_pass = np.copy(map_to_save)
         for j,pose in enumerate(cur_rob_path):
+            temp_map = np.copy(empty_map)
+            temp_map[pose[0]][pose[1]] = 100
+            temp_map_morph = morphology.grey_dilation(temp_map, size=(morph_size_rob,morph_size_rob))
+
+            map_to_pass[j+1,:,:] = np.copy(temp_map_morph+map)
             map_to_save[j+1,pose[0],pose[1]]=100
 
-        map_to_pass = np.copy(map_to_save)
-        for j in range(map_to_pass.shape[0]):
-            temp_map_morph = morphology.grey_dilation(map_to_pass[j,:,:],size=(morph_size,morph_size))
-            map_to_pass[j,:,:] = np.copy(temp_map)
+        # for j in range(map_to_pass.shape[0]):
+            # temp_map_morph = morphology.grey_dilation(map_to_pass[j,:,:],size=(morph_size,morph_size))
+            # map_to_pass[j,:,:] = np.copy(temp_map)
 
     return robots

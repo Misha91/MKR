@@ -1,29 +1,11 @@
 # mkr_tm_ws
 *NOT IN PROGRESS* 
 
+Launch command
 <b>roslaunch motion start.launch</b>
 
 <br/>
-<b>To-do list and status:  </b>
-<br/>
-<i>Part I</i>  
-Base robot class with properties - TU !Please check scripts folder
-<br/>
-Input to create robots  - TU
-<br/>
-Spawn robots in world  
-<br/>   
-<i>Part II</i>   
-A* function  
-Planning for each robot  
-Checking of colisions/deadlock  
-Path modification and veryfication  
-<br/>  
-<i>Part III</i>  
-Generating of waypoints  
-Translating of waypoints to robots  
-Position update for each time base  
-<br/>
+
 <br/>
 <b>Initialize robots:  </b>
 <br/>

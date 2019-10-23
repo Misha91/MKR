@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<node name="robot1_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 1.4 1.0 1.0" />  
+
+</launch>

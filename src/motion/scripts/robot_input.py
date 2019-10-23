@@ -8,6 +8,8 @@ import os
 import subprocess
 from planner import plan
 from planner_multi import multi_plan
+from coord_helper import *
+import thread
 
 from nav_msgs.msg import OccupancyGrid
 import numpy as np
@@ -149,3 +151,11 @@ planned_robots = multi_plan(map,robots)
 for robot in planned_robots:
     print(robot.waypoint)
     robot.startMoving()
+
+for robot in planned_robots:
+    #thread.start_new_thread(start_movement, (robot.nameId))
+    start_movement(robot.nameId)
+    #if not start_movement(robot.nameId):
+    #    rospy.logerr('Could not start motion, exiting')
+        #return
+    #rospy.loginfo('Movement started')

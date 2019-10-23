@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-
-	<node name="robot0_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 1.8 6.6 -0.1" /> 
-	<node name="robot1_spawner" pkg="stdr_robot" type="robot_handler" args="add $(find turtlebot_stdr)/robot/turtlebot.yaml 1.4 1.0 1.0" />  
+	<include file="$(find simulator_e130)/launch/0.launch" />
+	<include file="$(find simulator_e130)/launch/1.launch" />
 
 </launch>

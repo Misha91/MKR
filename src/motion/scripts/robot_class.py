@@ -66,7 +66,7 @@ class Robot(object):
         for ind, p in enumerate(self.waypoint):
             traj.append(self.gridToCoord(p, ind))
         traj = tuple(traj)
-
+        #print(traj)
         server_ns_parameter_name = "~" + self.nameId
 
         try:
@@ -80,7 +80,7 @@ class Robot(object):
             rospy.logerr('Could not add path, exiting')
             return
         rospy.loginfo('Path added')
-
+        """
         if not start_movement(server_ns):
             rospy.logerr('Could not start motion, exiting')
             return
@@ -97,6 +97,7 @@ class Robot(object):
             rospy.logerr('Could not clear path, exiting')
             return
         rospy.loginfo('Path cleared')
+        """
 
     """
 

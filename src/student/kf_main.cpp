@@ -33,18 +33,18 @@ Point prevMeas (0,0);
 
 MatrixXf A(4,4);
 MatrixXf B(4,1);
-MatrixXf Q(4,4); // Covariance of the process noise.
+MatrixXf Q(2,2); // Covariance of the process noise.
 MatrixXf R(4,4);  // Covariance of the observation noise
-MatrixXf C(4,4);  // Observation matrix. Sometimes called H.
-MatrixXf S(4,4);
+MatrixXf C(2,4);  // Observation matrix. Sometimes called H.
+MatrixXf S(2,2);
 MatrixXf P(4,4);
 MatrixXf P_est(4,4);
-MatrixXf K(4,4);
+MatrixXf K(4,2);
 MatrixXf I(4,4);
 VectorXf cur_state(4);  // State vector. Sometimes called X.
 VectorXf x_predict(4);
-VectorXf cur_meas(4);  // State vector. Sometimes called X.
-VectorXf innovation(4);
+VectorXf cur_meas(2);  // State vector. Sometimes called X.
+VectorXf innovation(2);
 float dt = 0.1;
 float g = 9.81;
 
@@ -86,33 +86,37 @@ int main(int argc, char** argv)
     }
     // All parameters parsed
     A << 1, 0, dt, 0,
-         0, 1, 0, -dt,
+         0, 1, 0, dt,
          0, 0, 1, 0,
          0, 0, 0, 1;
     float tmp_helper = -0.5*dt*dt;
     B << 0, tmp_helper, 0, -dt;
-    C << MatrixXf::Identity(4, 4);
+    C << MatrixXf::Identity(2, 4);
+    C(0,0) = 1;
+    C(1,1) = 1;
+
 // """ MEASUREMENT UNCERTAINTY """
-    Q << MatrixXf::Identity(4, 4);
-    Q(0,0) = 25;
-    Q(1,1) = 25;
-    Q(2,2) = 4;
-    Q(3,3) = 4;
+    Q << MatrixXf::Identity(2, 2);
+    Q(0,0) = 5;
+    Q(1,1) = 5;
+//    Q(2,2) = 4;
+//    Q(3,3) = 4;
 // """ PREDICTION UNCERTAINTY """
     R << MatrixXf::Identity(4, 4);
-    R(0,0) = 0.5;
-    R(1,1) = 0.5;
-    R(2,2) = 0.5;
-    R(3,3) = 0.5;
+    R(0,0) = 0.1;
+    R(1,1) = 0.1;
+    R(2,2) = 0.1;
+    R(3,3) = 0.1;
+
 
     I << MatrixXf::Identity(4,4);
     P << MatrixXf::Zero(4, 4);
     P_est << MatrixXf::Zero(4, 4);
 
 
-    cur_state << 0, 0, 0, 0;
-    cur_meas << 0, 0, 0, 0;
-    innovation << 0, 0, 0, 0;
+    cur_state << 0, 0, 10, 10;
+    cur_meas << 0, 0;
+    innovation << 0, 0;
 
     Gui gui;
     System system;
@@ -126,7 +130,6 @@ int main(int argc, char** argv)
     Point kfPosition;
     for (int i = 1; i < nSteps; i++)
     {
-
         system.makeStep();
         truth = system.getTruthPosition();
         measurement = system.getMeasurement();
@@ -155,8 +158,8 @@ Point  KalmanFilter(const Point & measuredPosition)
 
   cur_meas(0) = measuredPosition.x;
   cur_meas(1) = measuredPosition.y;
-  cur_meas(2) = 0.01*(measuredPosition.x - cur_state(2))/(abs(measuredPosition.x - cur_state(2))*dt);
-  cur_meas(3) = 0.01*(measuredPosition.y - cur_state(3))/(abs(measuredPosition.x - cur_state(2))*dt);
+  //cur_meas(2) = 0.01*(measuredPosition.x - cur_state(2))/(abs(measuredPosition.x - cur_state(2))*dt);
+  //cur_meas(3) = 0.01*(measuredPosition.y - cur_state(3))/(abs(measuredPosition.x - cur_state(2))*dt);
 // prediction
   x_predict =  A * cur_state + B*g;
   P_est = A * P * A.transpose() + R;

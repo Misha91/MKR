@@ -22,7 +22,7 @@
 #include <ctime>
 #include <iostream>
 #include <random>
-
+#include <map>
 #include <vtkPNGReader.h>
 
 #include "gui/gui.h"
@@ -77,6 +77,37 @@ void help(char** argv)
        "Parameter [-f or -F] specifies path to data.\n" <<
        "Parameter [-m or -M] specifies number of measurements taken, defaults to 2." <<
        std::endl;
+}
+
+ParticleVector weightUpdate(ParticleVector init){
+
+  for (auto &a:init)
+  {
+    //printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
+  }
+
+  return init;
+}
+
+
+ParticleVector rouletteSampler(const ParticleVector init){
+  std::map <double, int> hashTable;
+  double weightAdder = 0;
+  ParticleVector result;
+
+  for (int i = 0; i < init.size(); i++){
+    weightAdder += init[i].weight;
+    hashTable[weightAdder] = i;
+  }
+
+
+  for (int i = 0; i < init.size(); i++){
+  //for (int i = 0; i < 10; i++){
+    double tmp = uniformSample(0, weightAdder);
+    result.push_back(init[hashTable.lower_bound(tmp)->second]);
+  }
+  //printf("%d %d\n", init.size(), result.size());
+  return result;
 }
 
 int main(int argc, char** argv)
@@ -199,12 +230,16 @@ int main(int argc, char** argv)
          LaserScan scanTest = loader[i].scan; //361
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
-
+         particles = weightUpdate(particles);
+         particles = rouletteSampler(particles);
+         /*
          printf("\nPARTICLES:\n");
          for (auto &a:particles){
            printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
 
          }
+
+
          printf("\n%d\n", scanPoints.size());
 
          for (auto &a:scanPoints){
@@ -222,6 +257,8 @@ int main(int argc, char** argv)
          for (auto &a:scanTest){
            printf("%.2f\t", a);
          }
+         */
+
          //
          // gui.clearPositionPoints();
          gui.setPosition(robotPosition2point(pos));

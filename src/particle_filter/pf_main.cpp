@@ -196,14 +196,39 @@ int main(int argc, char** argv)
     for (size_t i = 0; i < nMeasurements; i++)
     {
          pos = loader[i].position;
-         scan = simul.getScan(pos);
+         LaserScan scanTest = loader[i].scan; //361
+         scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
+
+         printf("\nPARTICLES:\n");
+         for (auto &a:particles){
+           printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
+
+         }
+         printf("\n%d\n", scanPoints.size());
+
+         for (auto &a:scanPoints){
+           printf("%.2f\t", a);
+         }
+
+         printf("\n%d\n", scan.size());
+
+         for (auto &a:scan){
+           printf("%.2f\t", a);
+         }
+
+         printf("\n%d\n", scanTest.size());
+
+         for (auto &a:scanTest){
+           printf("%.2f\t", a);
+         }
+         //
          // gui.clearPositionPoints();
          gui.setPosition(robotPosition2point(pos));
          gui.clearMapPoints();
          gui.setPointsToMap(scanPoints, robotPosition2point(pos));
          gui.setParticlePoints(particles);
-         //gui.startInteractor();
+         gui.startInteractor();
     }
 
     auto end = steady_clock::now();
@@ -256,4 +281,3 @@ inline double toRadians(double alpha)
 {
    return (alpha * M_PI) / 180.0;
 }
-

@@ -37,9 +37,9 @@ double normalSample (double mean, double sigma) {
 
 RobotPosition moveParticle (RobotPosition const &pos, RobotPosition const &prev,RobotPosition const &r) {
   RobotPosition result;
-  result.x = normalSample(r.x,0.1);   
-  result.y = normalSample(r.y,0.1);   
-  result.phi = normalSample(r.phi,0.1);   
+  result.x = normalSample(r.x,0.5);
+  result.y = normalSample(r.y,0.5);
+  result.phi = normalSample(r.phi,0.5);
   std::cout << "P: " << result.x << " " << result.y << std::endl;
   return result;
 }

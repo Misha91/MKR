@@ -79,7 +79,54 @@ void help(char** argv)
        std::endl;
 }
 
+// -------------------------------------------------------------------------------------
+// TU
+double distribution(double z,double z_star){
+    double stddev = 0.4;
+    double function;
+    function = (1/(stddev*sqrt(2*M_PI)))*exp(-(z-z_star)*(z-z_star)/(2*stddev*stddev));
+    return function;
+}
+
+double prob_hit(double z_star, double z){
+        double function_prob,z_max,n;
+        function_prob = 0.0;
+        z_max = 5.0;
+        n = 1.0;
+
+        if (z > 0.0 && z<z_max)
+        {
+            function_prob = n*distribution(z,z_star);
+        }
+        else
+        {
+            function_prob = 0.0;
+        }
+
+        return function_prob;
+}
+
 ParticleVector weightUpdate(ParticleVector init){
+  int alpha1
+  int alpha2
+  int alpha3
+  int alpha4
+  auto prob_hit = [](auto z_star, auto z){
+    double function_prob,stddev,z_max,n
+
+    std::normal_distribution<double> distribution(z_star,stddev);
+
+    if (z > 0 && z<zmax)
+    {
+        function_prob = n*distribution(z);
+    }
+    else
+    {
+        function_prob = 0;
+    }
+
+    return function_prob;
+  }
 
   for (auto &a:init)
   {
@@ -88,6 +135,9 @@ ParticleVector weightUpdate(ParticleVector init){
 
   return init;
 }
+
+
+// --------------------------------------------------------------------------
 
 
 ParticleVector rouletteSampler(const ParticleVector init){

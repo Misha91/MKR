@@ -24,6 +24,7 @@
 #include <random>
 #include <map>
 #include <vtkPNGReader.h>
+#include <math.h>
 
 #include "gui/gui.h"
 #include "dataLoader/laserDataLoader.h"
@@ -39,6 +40,14 @@ std::random_device g_rd;
 std::default_random_engine g_eng(g_rd());
 std::uniform_real_distribution<double> g_uniform_distribution(0, 1);
 std::normal_distribution<double> g_normal_distribution(0, 1);
+
+
+// GLOBAL parameters
+double z_max = 5.0;
+double n = 1.0;
+RobotPosition real_pos;
+LaserScan scan;
+PointList scanPoints;
 
 /* Return one sample of a uniform distribution between min and max
  */
@@ -89,12 +98,8 @@ double distribution(double z,double z_star){
 }
 
 double prob_hit(double z_star, double z){
-        double function_prob,z_max,n;
-        function_prob = 0.0;
-        z_max = 5.0;
-        n = 1.0;
-
-        if (z > 0.0 && z<z_max)
+        double function_prob;
+        if (z >= 0.0 && z<=z_max)
         {
             function_prob = n*distribution(z,z_star);
         }
@@ -106,30 +111,71 @@ double prob_hit(double z_star, double z){
         return function_prob;
 }
 
-ParticleVector weightUpdate(ParticleVector init){
-  int alpha1
-  int alpha2
-  int alpha3
-  int alpha4
-  auto prob_hit = [](auto z_star, auto z){
-    double function_prob,stddev,z_max,n
+double prob_short(double z_star, double z){
+        double function_prob,lambda;
+        lambda = 0.3;
 
-    std::normal_distribution<double> distribution(z_star,stddev);
+        if (z >= 0.0 && z<=z_star)
+        {
+            function_prob = n*lambda*exp(-lambda*z);
+        }
+        else
+        {
+            function_prob = 0.0;
+        }
 
-    if (z > 0 && z<zmax)
-    {
-        function_prob = n*distribution(z);
-    }
-    else
-    {
-        function_prob = 0;
-    }
+        return function_prob;
+}
 
-    return function_prob;
-  }
+double prob_rand(double z){
+        double function_prob;
+        function_prob = 0.0;
 
+        if (z >= 0.0 && z<=z_max)
+        {
+            function_prob = 1/z_max;
+        }
+        else
+        {
+            function_prob = 0.0;
+        }
+
+        return function_prob;
+}
+
+double prob_max(double z){
+        double function_prob;
+        function_prob = 0.0;
+
+        if (z==z_max)
+        {
+            function_prob = 1;
+        }
+        else
+        {
+            function_prob = 0.0;
+        }
+
+        return function_prob;
+}
+
+
+ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
+  double alpha_hit = 0.9;
+  double alpha_short = 1;
+  double alpha_rand = 1;
+  double alpha_max = 0.5;
+  LaserScan z,z_star;
+  double prob_beam;
+  z_star = simul.getScan(real_pos);
   for (auto &a:init)
   {
+    z = simul.getScan(a.pos);
+    for (int i=0;i<z_star.size();i++){
+      prob_beam = prob_beam*(alpha_hit*prob_hit(z_star[i],z[i]) + alpha_short*prob_short(z_star[i],z[i])+alpha_rand*prob_rand(z[i])+alpha_max*prob_max(z[i]));
+    }
+    a.weight = prob_beam;
+
     //printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
   }
 
@@ -224,8 +270,7 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    LaserScan scan;
-    PointList scanPoints;
+
     Measurement measurement;
     RobotPosition pos;
 
@@ -233,7 +278,9 @@ int main(int argc, char** argv)
     vtkSmartPointer<vtkPNGReader> reader = vtkSmartPointer<vtkPNGReader>::New();
     reader->SetFileName("../data/belgioioso-map5b.png");
 
+    //simul(reader)
     imr::LaserSimulator simul(reader);
+
     Gui gui(reader);
     std::cout << "X: " << simul.grid2realX(0) << " " << simul.grid2realX(1872) << std::endl;
     std::cout << "Y: " << simul.grid2realY(0) << " " << simul.grid2realY(5015) << std::endl;
@@ -278,9 +325,10 @@ int main(int argc, char** argv)
     {
          pos = loader[i].position;
          LaserScan scanTest = loader[i].scan; //361
+         real_pos = pos;
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
-         particles = weightUpdate(particles);
+         particles = weightUpdate(particles, simul);
          particles = rouletteSampler(particles);
          /*
          printf("\nPARTICLES:\n");

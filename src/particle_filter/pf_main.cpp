@@ -162,23 +162,48 @@ double prob_max(double z){
 
 ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
   double alpha_hit = 0.9;
-  double alpha_short = 1;
-  double alpha_rand = 1;
-  double alpha_max = 0.5;
-  LaserScan z,z_star;
+  double alpha_short = 1; //1
+  double alpha_rand = 1; //1
+  double alpha_max = 0.5; //0.5
+  LaserScan z, z_star;
   double prob_beam;
   z_star = simul.getScan(real_pos);
   for (auto &a:init)
   {
+    prob_beam = 1;
     z = simul.getScan(a.pos);
     for (int i=0;i<z_star.size();i++){
       prob_beam = prob_beam*(alpha_hit*prob_hit(z_star[i],z[i]) + alpha_short*prob_short(z_star[i],z[i])+alpha_rand*prob_rand(z[i])+alpha_max*prob_max(z[i]));
+      //printf("%.10f\t", prob_beam);
     }
     a.weight = prob_beam;
 
     //printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
   }
+  double maxW_found = 0;
+  Particle maxW_Particle;
 
+  for (auto &a:init){
+    if (a.weight > maxW_found)
+    {
+      maxW_found = a.weight;
+      maxW_Particle = a;
+    }
+    if (a.weight > 0){
+      printf("%.2f %.2f %.2f %.10f\n",a.pos.x, a.pos.y, a.pos.phi, a.weight);
+    }
+  }
+  printf("\n----------------------\n");
+  printf("%.2f %.2f %.2f %.10f\n",maxW_Particle.pos.x, maxW_Particle.pos.y,  maxW_Particle.pos.phi, maxW_Particle.weight);
+  printf("%.2f %.2f %.2f\n",real_pos.x,real_pos.y, real_pos.phi);
+  z = simul.getScan(maxW_Particle.pos);
+  for (int i=0;i<z_star.size();i++)
+  {
+    printf("%.5f %.5f %.5f %.5f\n",prob_hit(z_star[i],z[i]), prob_short(z_star[i],z[i]), prob_rand(z[i]), prob_max(z[i]));
+  }
+  printf("\n----------------------\n");
+  ParticleVector dummy;
+  dummy.push_back(maxW_Particle);
   return init;
 }
 
@@ -290,7 +315,7 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
-    for (size_t i = 0; i < 1000;)
+    for (size_t i = 0; i < 100000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -328,8 +353,12 @@ int main(int argc, char** argv)
          real_pos = pos;
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
-         particles = weightUpdate(particles, simul);
-         particles = rouletteSampler(particles);
+         if (i > 0)
+         {
+           particles = weightUpdate(particles, simul);
+           particles = rouletteSampler(particles);
+         }
+
          /*
          printf("\nPARTICLES:\n");
          for (auto &a:particles){

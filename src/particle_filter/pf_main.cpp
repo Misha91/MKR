@@ -187,6 +187,7 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
 
     //printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
   }
+  /*
   double maxW_found = 0;
   Particle maxW_Particle;
 
@@ -197,7 +198,7 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
       maxW_Particle = a;
     }
     if (a.weight > 0){
-      printf("%.2f %.2f %.2f %.10f\n",a.pos.x, a.pos.y, a.pos.phi, a.weight);
+     printf("%.2f %.2f %.2f %.10f\n",a.pos.x, a.pos.y, a.pos.phi, a.weight);
     }
   }
   printf("\n----------------------\n");
@@ -211,6 +212,7 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
   printf("\n----------------------\n");
   ParticleVector dummy;
   dummy.push_back(maxW_Particle);
+  */
   return init;
 }
 
@@ -222,7 +224,7 @@ RobotPosition moveParticle (RobotPosition const &r) {
   result.x = normalSampleMove(r.x,0.1);
   result.y = normalSampleMove(r.y,0.1);
   result.phi = normalSampleMove(r.phi,0.1);
-  std::cout << "P: " << result.x << " " << result.y << std::endl;
+  //std::cout << "P: " << result.x << " " << result.y << std::endl;
   return result;
 }
 
@@ -241,7 +243,7 @@ ParticleVector moveParticles(ParticleVector init, double delta_x, double delta_y
 // --------------------------------------------------------------------------
 
 
-ParticleVector rouletteSampler(const ParticleVector init){
+ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   std::map <double, int> hashTable;
   double weightAdder = 0;
   ParticleVector result;
@@ -251,13 +253,33 @@ ParticleVector rouletteSampler(const ParticleVector init){
     hashTable[weightAdder] = i;
   }
 
-
-  for (int i = 0; i < init.size(); i++){
+  double meanWeight = 0.0;
+  for (int i = 0; i < (0.9*init.size()); i++){
   //for (int i = 0; i < 10; i++){
     double tmp = uniformSample(0, weightAdder);
     result.push_back(init[hashTable.lower_bound(tmp)->second]);
+    meanWeight += init[hashTable.lower_bound(tmp)->second].weight;
   }
   //printf("%d %d\n", init.size(), result.size());
+
+  meanWeight /= result.size();
+  double x;
+  double y;
+  double phi;
+
+  while (result.size() != init.size()){
+     x = uniformSample(-16.96, 19.7243);
+     y = uniformSample(-43.25, 55.0255);
+     phi = uniformSample(-M_PI, M_PI);
+     Particle p;
+     p.pos = RobotPosition(x, y, phi);
+     if (simul.isFeasible(p.pos))
+     {
+        p.weight = meanWeight;
+        result.push_back(p);
+     }
+  }
+
   return result;
 }
 
@@ -390,8 +412,8 @@ int main(int argc, char** argv)
            delta_y = real_pos.y - prev_real_pos.y;
            delta_phi = real_pos.phi - prev_real_pos.phi;
            particles = moveParticles(particles, delta_x,delta_y,delta_phi);
-           // particles = weightUpdate(particles, simul);
-           // particles = rouletteSampler(particles);
+           particles = weightUpdate(particles, simul);
+           particles = rouletteSampler(particles, simul);
          }
 
          prev_real_pos = real_pos;

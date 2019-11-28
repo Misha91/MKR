@@ -45,7 +45,7 @@ std::normal_distribution<double> g_normal_distribution(0, 1);
 // GLOBAL parameters
 double z_max = 5.0;
 double n = 1.0;
-RobotPosition real_pos;
+RobotPosition real_pos,prev_real_pos;
 LaserScan scan;
 PointList scanPoints;
 
@@ -62,6 +62,13 @@ double normalSample(double mean=0, double sigma=1)
 {
     return mean + g_normal_distribution(g_eng) * sigma;
 }
+
+double normalSampleMove (double mean, double sigma) {
+    static std::default_random_engine eng;
+    std::normal_distribution<> randomGenerator(mean, sigma);
+    return randomGenerator(eng);
+}
+
 
 inline double toRadians(double alpha);
 
@@ -207,7 +214,30 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
   return init;
 }
 
+/// -----------------------------------------------------------------------------------
+//Move Particle
 
+RobotPosition moveParticle (RobotPosition const &r) {
+  RobotPosition result;
+  result.x = normalSampleMove(r.x,0.1);
+  result.y = normalSampleMove(r.y,0.1);
+  result.phi = normalSampleMove(r.phi,0.1);
+  std::cout << "P: " << result.x << " " << result.y << std::endl;
+  return result;
+}
+
+//Move particles
+ParticleVector moveParticles(ParticleVector init, double delta_x, double delta_y,double delta_phi){
+  RobotPosition r;
+  for (auto &a:init)
+  {
+    r.x = a.pos.x + delta_x;
+    r.y = a.pos.y + delta_y;
+    r.phi = a.pos.phi + delta_phi;
+    a.pos = moveParticle(r);
+  }
+  return init;
+}
 // --------------------------------------------------------------------------
 
 
@@ -233,7 +263,7 @@ ParticleVector rouletteSampler(const ParticleVector init){
 
 int main(int argc, char** argv)
 {
-    unsigned int nMeasurements = 2;
+    unsigned int nMeasurements = 5;
     char *dataFile;
 
     // argument count must be greater than three
@@ -315,7 +345,7 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
-    for (size_t i = 0; i < 100000;)
+    for (size_t i = 0; i < 1000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -350,15 +380,21 @@ int main(int argc, char** argv)
     {
          pos = loader[i].position;
          LaserScan scanTest = loader[i].scan; //361
+         double delta_x, delta_y, delta_phi;
          real_pos = pos;
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
          if (i > 0)
          {
-           particles = weightUpdate(particles, simul);
-           particles = rouletteSampler(particles);
+           delta_x = real_pos.x - prev_real_pos.x;
+           delta_y = real_pos.y - prev_real_pos.y;
+           delta_phi = real_pos.phi - prev_real_pos.phi;
+           particles = moveParticles(particles, delta_x,delta_y,delta_phi);
+           // particles = weightUpdate(particles, simul);
+           // particles = rouletteSampler(particles);
          }
 
+         prev_real_pos = real_pos;
          /*
          printf("\nPARTICLES:\n");
          for (auto &a:particles){

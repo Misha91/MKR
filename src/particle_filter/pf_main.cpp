@@ -248,13 +248,15 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   double weightAdder = 0;
   ParticleVector result;
 
-  for (int i = 0; i < init.size(); i++){
+  for (int i = 0; i < init.size(); i++)
+  {
     weightAdder += init[i].weight;
     hashTable[weightAdder] = i;
   }
 
   double meanWeight = 0.0;
-  for (int i = 0; i < (0.9*init.size()); i++){
+  for (int i = 0; i < (0.9*init.size()); i++)
+  {
   //for (int i = 0; i < 10; i++){
     double tmp = uniformSample(0, weightAdder);
     result.push_back(init[hashTable.lower_bound(tmp)->second]);
@@ -267,7 +269,8 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   double y;
   double phi;
 
-  while (result.size() != init.size()){
+  while (result.size() != init.size())
+  {
      x = uniformSample(-16.96, 19.7243);
      y = uniformSample(-43.25, 55.0255);
      phi = uniformSample(-M_PI, M_PI);

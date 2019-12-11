@@ -230,16 +230,18 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
   double rand_delta_rot1, rand_delta_rot2, rand_delta_trans,alpha1,alpha2,alpha3,alpha4;
   alpha1 = 1;
   alpha2 = 1;
-  alpha3 = 1;
-  alpha4 = 1;
-  rand_delta_rot1 = delta_rot1 + uniformSample(-(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)),(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)));
-  rand_delta_rot2 = delta_rot2 + uniformSample(-(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)),(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)));
-  rand_delta_trans = delta_trans + uniformSample(-(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))),(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))));
+  alpha3 = 0.1;
+  alpha4 = 0.00001;
+  rand_delta_rot1 = delta_rot1 + uniformSample(0,(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)));
+  rand_delta_rot2 = delta_rot2 + uniformSample(0,(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)));
+  rand_delta_trans = delta_trans + uniformSample(0,(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))));
   for (auto &a:init)
   {
-    a.pos.x = a.pos.x + rand_delta_trans*cos(a.pos.phi + rand_delta_rot1);
-    a.pos.y = a.pos.y + rand_delta_trans*sin(a.pos.phi + rand_delta_rot1);
-    a.pos.phi = a.pos.phi + delta_rot1 + delta_rot2;
+    do{
+      a.pos.x = a.pos.x + rand_delta_trans*cos(a.pos.phi + rand_delta_rot1);
+      a.pos.y = a.pos.y + rand_delta_trans*sin(a.pos.phi + rand_delta_rot1);
+      a.pos.phi = a.pos.phi + rand_delta_rot1 + rand_delta_rot2;
+    }while(!simul.isFeasible(a.pos));
   }
   return init;
 }
@@ -379,7 +381,7 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
-    for (size_t i = 0; i < 10000;)
+    for (size_t i = 0; i < 1;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -388,11 +390,18 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 10000.0;
+          p.weight = 1.0 / 1.0;
           particles.push_back(p);
           i++;
        }
     }
+
+    Particle test = particles[0];
+    test.pos.x = 0.0;
+    test.pos.y = 0.0;
+    test.pos.phi = 0.0;
+    particles.clear();
+    particles.push_back(test);
 
     /* Example of use of the probability map, to test the sensor model */
     WeightedPointList probabilities;
@@ -421,20 +430,22 @@ int main(int argc, char** argv)
          scanPoints = simul.getRawPoints();
          if (i > 0)
          {
-           printf("%.4f %.4f %.4f (real)\n", real_pos.x, real_pos.y, real_pos.phi);
+           printf("%.4f %.4f %.4f (prev)\n", prev_real_pos.x, prev_real_pos.y, prev_real_pos.phi);
+           printf("%.4f %.4f %.4f (new)\n", real_pos.x, real_pos.y, real_pos.phi);
            // delta_x = real_pos.x - prev_real_pos.x;
            // delta_y = real_pos.y - prev_real_pos.y;
            delta_phi = real_pos.phi - prev_real_pos.phi;
 
            theta = atan2(real_pos.y-prev_real_pos.y,real_pos.x-prev_real_pos.x); //radians
 
-           delta_rot1 = real_pos.phi + theta;
+           delta_rot1 = prev_real_pos.phi + theta;
            delta_rot2 = delta_phi - delta_rot1;
            delta_trans = sqrt(pow(real_pos.x-prev_real_pos.x,2)+pow(real_pos.y-prev_real_pos.y,2));
 
-           particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul); //update motion model
-           particles = weightUpdate(particles, simul, scanTest); //use scanTest instead
-           particles = rouletteSampler(particles, simul);
+
+           particles = moveParticles(particles, delta_rot1, delta_rot2, delta_trans, simul); //update motion model
+           //particles = weightUpdate(particles, simul, scanTest); //use scanTest instead
+           //particles = rouletteSampler(particles, simul);
            printf("\n");
            max_weight.first = 0;
          }

@@ -20,5 +20,6 @@ add_subdirectory(laserSimulator)
 set(LIBS ${LIBS} lasersimulator)
 
 add_executable(ParticleFilter pf_main.cpp)
+add_executable(ParticleFilter2 "pf_main (low_variance_sampling).cpp")
 target_link_libraries(ParticleFilter ${LIBS} ${VTK_LIBRARIES})
-
+target_link_libraries(ParticleFilter2 ${LIBS} ${VTK_LIBRARIES})

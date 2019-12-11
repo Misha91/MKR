@@ -168,7 +168,7 @@ double prob_max(double z){
 
 
 ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan scanTest){
-  double alpha_hit = 0.7; //0.9
+  double alpha_hit = 0.7; //0.7
   double alpha_short = 0.35; //1
   double alpha_rand = 1; //1
   double alpha_max = 1; //0.5
@@ -179,7 +179,7 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan
     z_star.push_back(scanTest[i*10]);
   }
 
-
+  std::pair <double, Particle> max_weight_second (0, {{0,0,0},0});
   for (auto &a:init)
   {
     prob_beam = 1;
@@ -192,19 +192,21 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan
     a.weight = prob_beam;
     if (a.weight > max_weight.first)
     {
+      max_weight_second = max_weight;
       max_weight.first = a.weight;
       max_weight.second = a;
     }
   }
 
   printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
+  printf("%.4f %.4f %.4f %.12f (second) %.4f\n", max_weight_second.second.pos.x, max_weight_second.second.pos.y, max_weight_second.second.pos.phi, max_weight_second.first, max_weight.first/max_weight_second.first);
 
-  //z = simul.getScan(max_weight.second.pos);
-  //for (int i=0;i<z_star.size();i++)
-  //{
-  //  printf("%.4f %.4f\t")
-  //}
-
+  z = simul.getScan(max_weight.second.pos);
+  for (int i=0;i<z_star.size();i++)
+  {
+    printf("%.2f %.2f\t", z[i], z_star[i]);
+  }
+  printf("\n");
   return init;
 }
 
@@ -250,7 +252,7 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   }
   int cntMaxW = 0;
   double meanWeight = 0.0;
-  for (int i = 0; i < (0.85*init.size()); i++)
+  for (int i = 0; i < (0.7*init.size()); i++)
   {
   //for (int i = 0; i < 10; i++){
     double tmp = uniformSample(0, weightAdder);
@@ -371,7 +373,7 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
-    for (size_t i = 0; i < 2000;)
+    for (size_t i = 0; i < 10000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -380,7 +382,7 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 2000.0;
+          p.weight = 1.0 / 10000.0;
           particles.push_back(p);
           i++;
        }

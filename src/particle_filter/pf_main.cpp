@@ -224,14 +224,20 @@ RobotPosition moveParticle (RobotPosition const &r, LaserSimulator simul) {
 }
 
 //Move particles
-ParticleVector moveParticles(ParticleVector init, double delta_x, double delta_y,double delta_phi, LaserSimulator simul){
-  RobotPosition r;
+ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delta_rot2,double delta_trans, LaserSimulator simul){
+  double rand_delta_rot1, rand_delta_rot2, rand_delta_trans,alpha1,alpha2,alpha3,alpha4;
+  alpha1 = 1;
+  alpha2 = 1;
+  alpha3 = 1;
+  alpha4 = 1;
+  rand_delta_rot1 = delta_rot1 + uniformSample(-(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)),(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)));
+  rand_delta_rot2 = delta_rot2 + uniformSample(-(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)),(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)));
+  rand_delta_trans = delta_trans + uniformSample(-(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))),(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))));
   for (auto &a:init)
   {
-    r.x = a.pos.x + delta_x;
-    r.y = a.pos.y + delta_y;
-    r.phi = a.pos.phi + delta_phi;
-    a.pos = moveParticle(r, simul);
+    a.pos.x = a.pos.x + rand_delta_trans*cos(a.pos.phi + rand_delta_rot1);
+    a.pos.y = a.pos.y + rand_delta_trans*sin(a.pos.phi + rand_delta_rot1);
+    a.pos.phi = a.pos.phi + delta_rot1 + delta_rot2;
   }
   return init;
 }
@@ -407,17 +413,24 @@ int main(int argc, char** argv)
          pos = loader[i].position;
          LaserScan scanTest = loader[i].scan; //0th, 10th, 20th
          double delta_x, delta_y, delta_phi;
+         double theta,delta_rot1,delta_rot2,delta_trans;
          real_pos = pos;
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
          if (i > 0)
          {
            printf("%.4f %.4f %.4f (real)\n", real_pos.x, real_pos.y, real_pos.phi);
-           delta_x = real_pos.x - prev_real_pos.x;
-           delta_y = real_pos.y - prev_real_pos.y;
+           // delta_x = real_pos.x - prev_real_pos.x;
+           // delta_y = real_pos.y - prev_real_pos.y;
            delta_phi = real_pos.phi - prev_real_pos.phi;
 
-           particles = moveParticles(particles, delta_x,delta_y,delta_phi, simul); //update motion model
+           theta = atan2(real_pos.y-prev_real_pos.y,real_pos.x-prev_real_pos.x); //radians
+
+           delta_rot1 = real_pos.phi + theta;
+           delta_rot2 = delta_phi - delta_rot1;
+           delta_trans = sqrt(pow(real_pos.x-prev_real_pos.x,2)+pow(real_pos.y-prev_real_pos.y,2));
+
+           particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul); //update motion model
            particles = weightUpdate(particles, simul, scanTest); //use scanTest instead
            particles = rouletteSampler(particles, simul);
            printf("\n");

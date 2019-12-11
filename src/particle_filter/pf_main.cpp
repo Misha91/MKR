@@ -167,14 +167,17 @@ double prob_max(double z){
 }
 
 
-ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
-  double alpha_hit = 2; //0.9
-  double alpha_short = 0.5; //1
+ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan scanTest){
+  double alpha_hit = 0.7; //0.9
+  double alpha_short = 0.35; //1
   double alpha_rand = 1; //1
   double alpha_max = 1; //0.5
   LaserScan z, z_star;
   double prob_beam;
-  z_star = simul.getScan(real_pos);
+
+  for (int i = 0; i < 36; i++){
+    z_star.push_back(scanTest[i*10]);
+  }
 
 
   for (auto &a:init)
@@ -194,7 +197,14 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
     }
   }
 
-  printf("%.4f %.4f %.4f %.12f (best)\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first);
+  printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
+
+  //z = simul.getScan(max_weight.second.pos);
+  //for (int i=0;i<z_star.size();i++)
+  //{
+  //  printf("%.4f %.4f\t")
+  //}
+
   return init;
 }
 
@@ -237,10 +247,10 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   {
     weightAdder += init[i].weight;
     hashTable[weightAdder] = i;
-  } 
+  }
   int cntMaxW = 0;
   double meanWeight = 0.0;
-  for (int i = 0; i < (0.5*init.size()); i++)
+  for (int i = 0; i < (0.85*init.size()); i++)
   {
   //for (int i = 0; i < 10; i++){
     double tmp = uniformSample(0, weightAdder);
@@ -361,7 +371,7 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
-    for (size_t i = 0; i < 1000;)
+    for (size_t i = 0; i < 2000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -370,7 +380,7 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 1000.0;
+          p.weight = 1.0 / 2000.0;
           particles.push_back(p);
           i++;
        }
@@ -395,7 +405,7 @@ int main(int argc, char** argv)
     for (size_t i = 0; i < nMeasurements; i++)
     {
          pos = loader[i].position;
-         LaserScan scanTest = loader[i].scan; //361
+         LaserScan scanTest = loader[i].scan; //0th, 10th, 20th
          double delta_x, delta_y, delta_phi;
          real_pos = pos;
          scan = simul.getScan(pos); //36
@@ -407,8 +417,8 @@ int main(int argc, char** argv)
            delta_y = real_pos.y - prev_real_pos.y;
            delta_phi = real_pos.phi - prev_real_pos.phi;
 
-           particles = moveParticles(particles, delta_x,delta_y,delta_phi, simul);
-           particles = weightUpdate(particles, simul);
+           particles = moveParticles(particles, delta_x,delta_y,delta_phi, simul); //update motion model
+           particles = weightUpdate(particles, simul, scanTest); //use scanTest instead
            particles = rouletteSampler(particles, simul);
            printf("\n");
            max_weight.first = 0;

@@ -98,7 +98,7 @@ void help(char** argv)
 // -------------------------------------------------------------------------------------
 // TU
 double distribution(double z,double z_star){
-    double stddev = 0.4;
+    double stddev = 0.7;
     double function;
     function = (1/(stddev*sqrt(2*M_PI)))*exp(-(z-z_star)*(z-z_star)/(2*stddev*stddev));
     return function;
@@ -168,10 +168,10 @@ double prob_max(double z){
 
 
 ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul){
-  double alpha_hit = 1; //0.9
-  double alpha_short = 1; //1
+  double alpha_hit = 2; //0.9
+  double alpha_short = 0.5; //1
   double alpha_rand = 1; //1
-  double alpha_max = 0.5; //0.5
+  double alpha_max = 1; //0.5
   LaserScan z, z_star;
   double prob_beam;
   z_star = simul.getScan(real_pos);
@@ -237,7 +237,7 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
   {
     weightAdder += init[i].weight;
     hashTable[weightAdder] = i;
-  }
+  } 
   int cntMaxW = 0;
   double meanWeight = 0.0;
   for (int i = 0; i < (0.5*init.size()); i++)

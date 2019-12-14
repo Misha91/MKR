@@ -43,9 +43,13 @@ std::normal_distribution<double> g_normal_distribution(0, 1);
 std::pair <double, Particle> max_weight (0, {{0,0,0},0});
 
 // GLOBAL parameters
-double z_max = 28.0;
+
+// max range is defined in laser simulator script
+double z_max = 30.0;
+// custom sensor model parameter
 double n = 1.0;
-RobotPosition real_pos,prev_real_pos;
+
+RobotPosition prev_pos;
 LaserScan scan;
 PointList scanPoints;
 
@@ -62,13 +66,6 @@ double normalSample(double mean=0, double sigma=1)
 {
     return mean + g_normal_distribution(g_eng) * sigma;
 }
-
-double normalSampleMove (double mean, double sigma) {
-    static std::default_random_engine eng;
-    std::normal_distribution<> randomGenerator(mean, sigma);
-    return randomGenerator(eng);
-}
-
 
 inline double toRadians(double alpha);
 
@@ -96,15 +93,23 @@ void help(char** argv)
 }
 
 // -------------------------------------------------------------------------------------
-// TU
+//  SENSOR MODEL OF PARTICLES
+double normalize_angle(double angle){
+    // reduction of angle if it exceeds a value bigger than 2 pi
+    if (abs(angle)>2*M_PI) {
+      angle = remainder(angle,(2*M_PI));
+    }
+    return angle;
+}
 double distribution(double z,double z_star){
+    // standard Gaussian distribution
     double stddev = 0.7;
     double function;
     function = (1/(stddev*sqrt(2*M_PI)))*exp(-(z-z_star)*(z-z_star)/(2*stddev*stddev));
     return function;
 }
-
-double prob_hit(double z_star, double z){
+//---------------- Gaussian ---------------------------
+double prob_hit(double z, double z_star){
         double function_prob;
         if (z >= 0.0 && z<=z_max)
         {
@@ -117,8 +122,8 @@ double prob_hit(double z_star, double z){
 
         return function_prob;
 }
-
-double prob_short(double z_star, double z){
+//---------------- Exponential ---------------------------
+double prob_short(double z, double z_star){
         double function_prob,lambda;
         lambda = 0.3;
 
@@ -133,7 +138,7 @@ double prob_short(double z_star, double z){
 
         return function_prob;
 }
-
+//---------------- Flat non-zero ---------------------------
 double prob_rand(double z){
         double function_prob;
         function_prob = 0.0;
@@ -149,7 +154,7 @@ double prob_rand(double z){
 
         return function_prob;
 }
-
+//---------------- Column max range ---------------------------
 double prob_max(double z){
         double function_prob;
         function_prob = 0.0;
@@ -168,138 +173,149 @@ double prob_max(double z){
 
 
 ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan scanTest){
-  double alpha_hit = 0.7; //0.7
-  double alpha_short = 0.35; //1
-  double alpha_rand = 1; //1
-  double alpha_max = 1; //0.5
-  LaserScan z, z_star;
-  double prob_beam;
+    double alpha_hit = 0.7; //0.9
+    double alpha_short = 0.35; //1
+    double alpha_rand = 1; //1
+    double alpha_max = 1; //0.5
+    LaserScan z, z_star;
+    double prob_beam;
 
-  for (int i = 0; i < 36; i++){
-    z_star.push_back(scanTest[i*10]);
-  }
-
-  std::pair <double, Particle> max_weight_second (0, {{0,0,0},0});
-  for (auto &a:init)
-  {
-    prob_beam = 1;
-    z = simul.getScan(a.pos);
-
-    for (int i=0;i<z_star.size();i++){
-
-      prob_beam = prob_beam*(alpha_hit*prob_hit(z_star[i],z[i]) + alpha_short*prob_short(z_star[i],z[i])+alpha_rand*prob_rand(z[i])+alpha_max*prob_max(z[i]));
+    // get 36 beams from robot data
+    for (int i = 0; i < 36; i++){
+      z_star.push_back(scanTest[i*10]);
     }
-    a.weight = prob_beam;
-    if (a.weight > max_weight.first)
+    // for each particle
+    for (auto &a:init)
     {
-      max_weight_second = max_weight;
-      max_weight.first = a.weight;
-      max_weight.second = a;
+      // scan particle
+      z = simul.getScan(a.pos);
+      // calculate probability of each beam and multiply
+      prob_beam = 1;
+      for (int i=0;i<z_star.size();i++){
+        // I have changed the order of z_star and z because of consistency - TU
+        prob_beam = prob_beam*(alpha_hit*prob_hit(z[i],z_star[i]) + alpha_short*prob_short(z[i],z_star[i])+alpha_rand*prob_rand(z[i])+alpha_max*prob_max(z[i]));
+      }
+      // update weight of each particle
+      a.weight = prob_beam;
+      // calculate maximal weight
+      if (a.weight > max_weight.first)
+      {
+        max_weight.first = a.weight;
+        max_weight.second = a;
+      }
     }
-  }
-
-  printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
-  printf("%.4f %.4f %.4f %.12f (second) %.4f\n", max_weight_second.second.pos.x, max_weight_second.second.pos.y, max_weight_second.second.pos.phi, max_weight_second.first, max_weight.first/max_weight_second.first);
-
-  z = simul.getScan(max_weight.second.pos);
-  for (int i=0;i<z_star.size();i++)
-  {
-    printf("%.2f %.2f\t", z[i], z_star[i]);
-  }
-  printf("\n");
-  return init;
+    // checking of most probable particle's position
+    printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
+    return init;
 }
 
 /// -----------------------------------------------------------------------------------
-//Move Particle
-
-RobotPosition moveParticle (RobotPosition const &r, LaserSimulator simul) {
-  RobotPosition result;
-  do{
-    result.x = normalSampleMove(r.x,0.5);
-    result.y = normalSampleMove(r.y,0.5);
-    result.phi = normalSampleMove(r.phi,0.5);
-  }while(!simul.isFeasible(result));
-
-  //std::cout << "P: " << result.x << " " << result.y << std::endl;
-  return result;
-}
-
-//Move particles
+//  MOTION MODEL OF PARTICLE MOVEMENTS - TIMUR UZAKOV
 ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delta_rot2,double delta_trans, LaserSimulator simul){
-  double rand_delta_rot1, rand_delta_rot2, rand_delta_trans,alpha1,alpha2,alpha3,alpha4;
-  alpha1 = 1;
-  alpha2 = 1;
-  alpha3 = 0.1;
-  alpha4 = 0.00001;
-  rand_delta_rot1 = delta_rot1 + uniformSample(0,(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans)));
-  rand_delta_rot2 = delta_rot2 + uniformSample(0,(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans)));
-  rand_delta_trans = delta_trans + uniformSample(0,(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2))));
-  for (auto &a:init)
-  {
-    do{
-      a.pos.x = a.pos.x + rand_delta_trans*cos(a.pos.phi + rand_delta_rot1);
-      a.pos.y = a.pos.y + rand_delta_trans*sin(a.pos.phi + rand_delta_rot1);
-      a.pos.phi = a.pos.phi + rand_delta_rot1 + rand_delta_rot2;
-    }while(!simul.isFeasible(a.pos));
-  }
-  return init;
+    double delta_hat_rot1, delta_hat_rot2, delta_hat_trans;
+    double alpha1,alpha2,alpha3,alpha4;
+
+    // I don't know how to set them - TU
+    //angle coefficients
+    alpha1 = 0.0000001; // angle
+    alpha2 = 0.001; // distance
+    //distance coeffcitients
+    alpha3 = 0.001; // distance
+    alpha4 = 0.0000001; // two angles
+
+    //calculate new randomized deltas based on previous deltas
+    delta_hat_rot1 = delta_rot1 + normalSample(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans),0.7);
+    delta_hat_rot2 = delta_rot2 + normalSample(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans),0.7);
+    delta_hat_trans = delta_trans + normalSample(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2)),0.7);
+    printf("delta r1: %f  delta r2: %f delta t: %f \n", delta_rot1,delta_rot2,delta_trans);
+    //update each particle with respect to the common new deltas(<delta_hat>s)
+    for (auto &a:init)
+    {
+      //check if the point is on map
+      do{
+          a.pos.x = a.pos.x + delta_hat_trans*cos(a.pos.phi + delta_hat_rot1);
+          a.pos.y = a.pos.y + delta_hat_trans*sin(a.pos.phi + delta_hat_rot1);
+          a.pos.phi = a.pos.phi + delta_hat_rot1 + delta_hat_rot2;
+      }while(!simul.isFeasible(a.pos));
+    }
+    return init;
 }
 // --------------------------------------------------------------------------
-
+// ROULETTE SAMPLER
 
 ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
-  std::map <double, int> hashTable;
-  double weightAdder = 0;
-  ParticleVector result;
-
-  for (int i = 0; i < init.size(); i++)
-  {
-    weightAdder += init[i].weight;
-    hashTable[weightAdder] = i;
-  }
-  int cntMaxW = 0;
-  double meanWeight = 0.0;
-  for (int i = 0; i < (0.7*init.size()); i++)
-  {
-  //for (int i = 0; i < 10; i++){
-    double tmp = uniformSample(0, weightAdder);
-    //printf("%.12f\n", tmp);
-    Particle won = init[hashTable.lower_bound(tmp)->second];
-    if (won.pos.x == max_weight.second.pos.x &&  won.pos.y == max_weight.second.pos.y && won.pos.phi == max_weight.second.pos.phi){
-      cntMaxW++;
+    std::map <double, int> hashTable;
+    double weightAdder = 0;
+    ParticleVector result;
+    // create the table of weights
+    for (int i = 0; i < init.size(); i++)
+    {
+        weightAdder += init[i].weight;
+        hashTable[weightAdder] = i;
     }
-    result.push_back(won);
-    meanWeight += init[hashTable.lower_bound(tmp)->second].weight;
-  }
-  //printf("MW won %d\n", cntMaxW);
-  //printf("%.4f %.4f %.4f\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi);
 
-  meanWeight /= result.size();
-  double x;
-  double y;
-  double phi;
+    int cntMaxW = 0;
+    double meanWeight = 0.0;
 
-  while (result.size() != init.size())
-  {
-     x = uniformSample(-16.96, 19.7243);
-     y = uniformSample(-43.25, 55.0255);
-     phi = uniformSample(-M_PI, M_PI);
-     Particle p;
-     p.pos = RobotPosition(x, y, phi);
-     if (simul.isFeasible(p.pos))
-     {
-        p.weight = meanWeight;
-        result.push_back(p);
-     }
-  }
+    // resample 85 % of particles
+    for (int i = 0; i < (0.85*init.size()); i++)
+    {
+        //for (int i = 0; i < 10; i++){
 
-  return result;
+        //take random number from 0 to sum of weights
+        double tmp = uniformSample(0, weightAdder);
+
+        //printf("%.12f\n", tmp);
+
+        //find particle according to the table
+        Particle won = init[hashTable.lower_bound(tmp)->second];
+        result.push_back(won);
+
+        // counting how many times the most probable particle was selected
+        if (won.pos.x == max_weight.second.pos.x &&  won.pos.y == max_weight.second.pos.y && won.pos.phi == max_weight.second.pos.phi){
+          cntMaxW++;
+        }
+        // add weight of the selected particle ---- can be changed to won.weight
+        meanWeight += init[hashTable.lower_bound(tmp)->second].weight;
+
+    }
+
+    //printf("MW won %d\n", cntMaxW);
+    //printf("%.4f %.4f %.4f\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi);
+
+
+    // set 15 % of all particles to random position and mean weight
+    meanWeight /= result.size();
+
+    double x;
+    double y;
+    double phi;
+
+    while (result.size() != init.size())
+    {
+         // random particle
+         x = uniformSample(-16.96, 19.7243);
+         y = uniformSample(-43.25, 55.0255);
+         phi = uniformSample(-M_PI, M_PI);
+         Particle p;
+         p.pos = RobotPosition(x, y, phi);
+
+         // check if on map
+         if (simul.isFeasible(p.pos))
+         {
+              p.weight = meanWeight;
+              result.push_back(p);
+         }
+    }
+
+    return result;
 }
+// ----------------------------------------------------------------
 
+// MAIN
 int main(int argc, char** argv)
 {
-    unsigned int nMeasurements = 5;
+    unsigned int nMeasurements = 10;
     char *dataFile;
 
     // argument count must be greater than three
@@ -381,6 +397,12 @@ int main(int argc, char** argv)
     double x;
     double y;
     double phi;
+
+    // Motion model variables
+
+    double delta_x, delta_y, delta_phi,theta;
+    double delta_rot1,delta_rot2,delta_trans;
+
     for (size_t i = 0; i < 1;)
     {
        x = uniformSample(-16.96, 19.7243);
@@ -390,18 +412,11 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 1.0;
+          p.weight = 1.0 / 2000.0;
           particles.push_back(p);
           i++;
        }
     }
-
-    Particle test = particles[0];
-    test.pos.x = 0.0;
-    test.pos.y = 0.0;
-    test.pos.phi = 0.0;
-    particles.clear();
-    particles.push_back(test);
 
     /* Example of use of the probability map, to test the sensor model */
     WeightedPointList probabilities;
@@ -423,34 +438,49 @@ int main(int argc, char** argv)
     {
          pos = loader[i].position;
          LaserScan scanTest = loader[i].scan; //0th, 10th, 20th
-         double delta_x, delta_y, delta_phi;
-         double theta,delta_rot1,delta_rot2,delta_trans;
-         real_pos = pos;
          scan = simul.getScan(pos); //36
          scanPoints = simul.getRawPoints();
          if (i > 0)
          {
-           printf("%.4f %.4f %.4f (prev)\n", prev_real_pos.x, prev_real_pos.y, prev_real_pos.phi);
-           printf("%.4f %.4f %.4f (new)\n", real_pos.x, real_pos.y, real_pos.phi);
-           // delta_x = real_pos.x - prev_real_pos.x;
-           // delta_y = real_pos.y - prev_real_pos.y;
-           delta_phi = real_pos.phi - prev_real_pos.phi;
-
-           theta = atan2(real_pos.y-prev_real_pos.y,real_pos.x-prev_real_pos.x); //radians
-
-           delta_rot1 = prev_real_pos.phi + theta;
+           printf("%.4f %.4f %.4f (real)\n", pos.x, pos.y, pos.phi);
+           // MEASUREMENTS AND RELATED CALCULATIONS FOR MOTION MODEL
+           // --------------------------------------------------------
+           // calculate step position differences from odometry
+           delta_x = pos.x - prev_pos.x;
+           delta_y = pos.y - prev_pos.y;
+           delta_phi = pos.phi - prev_pos.phi;
+           // calculate orientation of movement line
+           theta = atan2(pos.y-prev_pos.y,pos.x-prev_pos.x); //radians
+           // previous state angle delta
+           delta_rot1 = theta-prev_pos.phi;
+           delta_rot1 = normalize_angle(delta_rot1);
+           // current state angle delta
            delta_rot2 = delta_phi - delta_rot1;
-           delta_trans = sqrt(pow(real_pos.x-prev_real_pos.x,2)+pow(real_pos.y-prev_real_pos.y,2));
+           delta_rot2 = normalize_angle(delta_rot2);
+           // change in position aka length of step
+           delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
+           // ----------------------------------------------------------
 
 
-           particles = moveParticles(particles, delta_rot1, delta_rot2, delta_trans, simul); //update motion model
-           //particles = weightUpdate(particles, simul, scanTest); //use scanTest instead
-           //particles = rouletteSampler(particles, simul);
+           // MAIN PARTICLE FILTER ALGORITHM
+           // ----------------------------------------------------------
+           //update motion model
+           particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
+           //update sensor model
+           // particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
+           //resample
+           // particles = rouletteSampler(particles, simul);
+           // ----------------------------------------------------------
            printf("\n");
            max_weight.first = 0;
          }
 
-         prev_real_pos = real_pos;
+         // storing position data
+         prev_pos = pos;
+
+
+         //DO WE NEED THIS? - TU
+         // --------------------
          /*
          printf("\nPARTICLES:\n");
          for (auto &a:particles){
@@ -477,8 +507,9 @@ int main(int argc, char** argv)
            printf("%.2f\t", a);
          }
          */
+         // ------------------
 
-         //
+         // printing particles on map
          // gui.clearPositionPoints();
          gui.setPosition(robotPosition2point(pos));
          gui.clearMapPoints();

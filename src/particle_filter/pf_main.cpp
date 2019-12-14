@@ -215,13 +215,13 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
     double delta_hat_rot1, delta_hat_rot2, delta_hat_trans;
     double alpha1,alpha2,alpha3,alpha4;
 
-    // I don't know how to set them - TU
+    // from videos of motion model --- MM3
     //angle coefficients
-    alpha1 = 0.0000001; // angle
-    alpha2 = 0.001; // distance
+    alpha1 = 0.004; // angle
+    alpha2 = 0.004; // distance
     //distance coeffcitients
-    alpha3 = 0.001; // distance
-    alpha4 = 0.0000001; // two angles
+    alpha3 = 0.004; // distance
+    alpha4 = 0.004; // two angles
 
     //calculate new randomized deltas based on previous deltas
     delta_hat_rot1 = delta_rot1 + normalSample(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans),0.7);

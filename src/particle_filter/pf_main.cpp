@@ -217,8 +217,8 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
 
     // from videos of motion model --- MM3
     //angle coefficients
-    alpha1 = 0.04; // angle
-    alpha2 = 0.04; // distance
+    alpha1 = 0.08; // angle
+    alpha2 = 0.08; // distance
     //distance coeffcitients
     alpha3 = 0.4; // distance
     alpha4 = 0.04; // two angles
@@ -470,6 +470,7 @@ int main(int argc, char** argv)
            delta_x = pos.x - prev_pos.x;
            delta_y = pos.y - prev_pos.y;
            delta_phi = pos.phi - prev_pos.phi;
+
            // calculate orientation of movement line
            theta = atan2(pos.y-prev_pos.y,pos.x-prev_pos.x); //radians
            // previous state angle delta
@@ -482,6 +483,10 @@ int main(int argc, char** argv)
            delta_rot2 = normalize_angle(delta_rot2);
            // change in position aka length of step
            delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
+           if (fabs(delta_trans) < 0.03 &&  fabs(delta_phi) < 0.03){
+             printf("skipped\n");
+             continue;
+           }
            // ----------------------------------------------------------
            // if ((delta_x < 0.00001) || (delta_y<0.00001)){
              // continue;

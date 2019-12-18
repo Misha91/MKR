@@ -96,7 +96,7 @@ void help(char** argv)
 //  SENSOR MODEL OF PARTICLES
 double normalize_angle(double angle){
     // reduction of angle if it exceeds a value bigger than 2 pi
-    if (abs(angle)>2*M_PI) {
+    if (fabs(angle)>2*M_PI) {
       angle = remainder(angle,(2*M_PI));
     }
     return angle;
@@ -217,26 +217,37 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
 
     // from videos of motion model --- MM3
     //angle coefficients
-    alpha1 = 0.004; // angle
-    alpha2 = 0.004; // distance
+    alpha1 = 0.2; // angle
+    alpha2 = 0.2; // distance
     //distance coeffcitients
-    alpha3 = 0.004; // distance
-    alpha4 = 0.004; // two angles
+    alpha3 = 0.2; // distance
+    alpha4 = 0.2; // two angles
 
     //calculate new randomized deltas based on previous deltas
-    delta_hat_rot1 = delta_rot1 + normalSample(alpha1*abs(delta_rot1)+alpha2*abs(delta_trans),0.7);
-    delta_hat_rot2 = delta_rot2 + normalSample(alpha1*abs(delta_rot2)+alpha2*abs(delta_trans),0.7);
-    delta_hat_trans = delta_trans + normalSample(alpha3*abs(delta_trans)+alpha4*(abs(delta_rot1)+abs(delta_rot2)),0.7);
-    printf("delta r1: %f  delta r2: %f delta t: %f \n", delta_rot1,delta_rot2,delta_trans);
+
+
     //update each particle with respect to the common new deltas(<delta_hat>s)
+
     for (auto &a:init)
     {
       //check if the point is on map
+      RobotPosition tmp;
       do{
-          a.pos.x = a.pos.x + delta_hat_trans*cos(a.pos.phi + delta_hat_rot1);
-          a.pos.y = a.pos.y + delta_hat_trans*sin(a.pos.phi + delta_hat_rot1);
-          a.pos.phi = a.pos.phi + delta_hat_rot1 + delta_hat_rot2;
-      }while(!simul.isFeasible(a.pos));
+          delta_hat_rot1 = normalSample(delta_rot1, alpha1*fabs(delta_rot1)+alpha2*fabs(delta_trans));
+          delta_hat_rot2 = normalSample(delta_rot2, alpha1*fabs(delta_rot2)+alpha2*fabs(delta_trans));
+          delta_hat_trans = normalSample(delta_trans, alpha3*fabs(delta_trans)+alpha4*(fabs(delta_rot1)+fabs(delta_rot2)));
+          //printf("%.2f\t", a.pos.x);
+
+          tmp.x = a.pos.x + delta_hat_trans*cos(a.pos.phi + delta_hat_rot1);
+          //printf("%.2f\n", a.pos.x);
+          tmp.y = a.pos.y + delta_hat_trans*sin(a.pos.phi + delta_hat_rot1);
+          tmp.phi = a.pos.phi + delta_hat_rot1 + delta_hat_rot2;
+          //if (tmp.x <= -16.96 || tmp.x >= 19.7243) continue;
+          //if (tmp.y <= -43.25 || tmp.y >= 55.0255) continue;
+
+      }while(!simul.isFeasible(tmp));
+
+      a.pos = tmp;
     }
     return init;
 }
@@ -258,7 +269,7 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
     double meanWeight = 0.0;
 
     // resample 85 % of particles
-    for (int i = 0; i < (0.85*init.size()); i++)
+    for (int i = 0; i < (0.60*init.size()); i++)
     {
         //for (int i = 0; i < 10; i++){
 
@@ -403,7 +414,7 @@ int main(int argc, char** argv)
     double delta_x, delta_y, delta_phi,theta;
     double delta_rot1,delta_rot2,delta_trans;
 
-    for (size_t i = 0; i < 1;)
+    for (size_t i = 0; i < 1000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -412,7 +423,7 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 2000.0;
+          p.weight = 1.0 / 1000.0;
           particles.push_back(p);
           i++;
        }
@@ -434,6 +445,7 @@ int main(int argc, char** argv)
 
     auto begin = steady_clock::now();
 
+
     for (size_t i = 0; i < nMeasurements; i++)
     {
          pos = loader[i].position;
@@ -454,6 +466,8 @@ int main(int argc, char** argv)
            // previous state angle delta
            delta_rot1 = theta-prev_pos.phi;
            delta_rot1 = normalize_angle(delta_rot1);
+
+
            // current state angle delta
            delta_rot2 = delta_phi - delta_rot1;
            delta_rot2 = normalize_angle(delta_rot2);
@@ -461,15 +475,17 @@ int main(int argc, char** argv)
            delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
            // ----------------------------------------------------------
 
-
+           particles = rouletteSampler(particles, simul);
            // MAIN PARTICLE FILTER ALGORITHM
            // ----------------------------------------------------------
            //update motion model
-           particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
+
            //update sensor model
-           // particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
+
+            particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
+            particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
            //resample
-           // particles = rouletteSampler(particles, simul);
+           //
            // ----------------------------------------------------------
            printf("\n");
            max_weight.first = 0;

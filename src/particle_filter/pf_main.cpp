@@ -173,10 +173,10 @@ double prob_max(double z){
 
 
 ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan scanTest){
-    double alpha_hit = 0.7; //0.9
-    double alpha_short = 0.35; //1
+    double alpha_hit = 0.9; //0.9
+    double alpha_short = 1; //1
     double alpha_rand = 1; //1
-    double alpha_max = 1; //0.5
+    double alpha_max = 0.5; //0.5
     LaserScan z, z_star;
     double prob_beam;
 
@@ -217,11 +217,11 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
 
     // from videos of motion model --- MM3
     //angle coefficients
-    alpha1 = 0.2; // angle
-    alpha2 = 0.2; // distance
+    alpha1 = 0.04; // angle
+    alpha2 = 0.04; // distance
     //distance coeffcitients
-    alpha3 = 0.2; // distance
-    alpha4 = 0.2; // two angles
+    alpha3 = 0.4; // distance
+    alpha4 = 0.04; // two angles
 
     //calculate new randomized deltas based on previous deltas
 
@@ -232,7 +232,8 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
     {
       //check if the point is on map
       RobotPosition tmp;
-      do{
+      Particle p;
+      // do{
           delta_hat_rot1 = normalSample(delta_rot1, alpha1*fabs(delta_rot1)+alpha2*fabs(delta_trans));
           delta_hat_rot2 = normalSample(delta_rot2, alpha1*fabs(delta_rot2)+alpha2*fabs(delta_trans));
           delta_hat_trans = normalSample(delta_trans, alpha3*fabs(delta_trans)+alpha4*(fabs(delta_rot1)+fabs(delta_rot2)));
@@ -244,10 +245,18 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
           tmp.phi = a.pos.phi + delta_hat_rot1 + delta_hat_rot2;
           //if (tmp.x <= -16.96 || tmp.x >= 19.7243) continue;
           //if (tmp.y <= -43.25 || tmp.y >= 55.0255) continue;
+          if (!simul.isFeasible(tmp)){
+              do {
+                // random particle
+                double x,y,phi;
+                x = uniformSample(-16.96, 19.7243);
+                y = uniformSample(-43.25, 55.0255);
+                phi = uniformSample(-M_PI, M_PI);
+                p.pos = RobotPosition(x, y, phi);
+              }while(!simul.isFeasible(p.pos));
+              a.pos = p.pos;
+          } else a.pos = tmp;
 
-      }while(!simul.isFeasible(tmp));
-
-      a.pos = tmp;
     }
     return init;
 }
@@ -269,7 +278,7 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
     double meanWeight = 0.0;
 
     // resample 85 % of particles
-    for (int i = 0; i < (0.60*init.size()); i++)
+    for (int i = 0; i < (0.95*init.size()); i++)
     {
         //for (int i = 0; i < 10; i++){
 
@@ -414,7 +423,7 @@ int main(int argc, char** argv)
     double delta_x, delta_y, delta_phi,theta;
     double delta_rot1,delta_rot2,delta_trans;
 
-    for (size_t i = 0; i < 1000;)
+    for (size_t i = 0; i < 2000;)
     {
        x = uniformSample(-16.96, 19.7243);
        y = uniformSample(-43.25, 55.0255);
@@ -423,7 +432,7 @@ int main(int argc, char** argv)
        p.pos = RobotPosition(x, y, phi);
        if (simul.isFeasible(p.pos))
        {
-          p.weight = 1.0 / 1000.0;
+          p.weight = 1.0 / 2000.0;
           particles.push_back(p);
           i++;
        }
@@ -474,7 +483,10 @@ int main(int argc, char** argv)
            // change in position aka length of step
            delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
            // ----------------------------------------------------------
-
+           // if ((delta_x < 0.00001) || (delta_y<0.00001)){
+             // continue;
+           // }
+           // else {
            particles = rouletteSampler(particles, simul);
            // MAIN PARTICLE FILTER ALGORITHM
            // ----------------------------------------------------------
@@ -484,6 +496,8 @@ int main(int argc, char** argv)
 
             particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
             particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
+
+           // }
            //resample
            //
            // ----------------------------------------------------------

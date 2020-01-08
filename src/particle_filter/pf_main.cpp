@@ -238,7 +238,6 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
           delta_hat_rot2 = normalSample(delta_rot2, alpha1*fabs(delta_rot2)+alpha2*fabs(delta_trans));
           delta_hat_trans = normalSample(delta_trans, alpha3*fabs(delta_trans)+alpha4*(fabs(delta_rot1)+fabs(delta_rot2)));
           //printf("%.2f\t", a.pos.x);
-
           tmp.x = a.pos.x + delta_hat_trans*cos(a.pos.phi + delta_hat_rot1);
           //printf("%.2f\n", a.pos.x);
           tmp.y = a.pos.y + delta_hat_trans*sin(a.pos.phi + delta_hat_rot1);
@@ -483,19 +482,19 @@ int main(int argc, char** argv)
            // change in position aka length of step
            delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
            // ----------------------------------------------------------
-           // if ((delta_x < 0.00001) || (delta_y<0.00001)){
-             // continue;
+           // if ((delta_x < 0.00000000000001) || (delta_y<0.0000000000000001)){
+                    // particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);
            // }
            // else {
-           particles = rouletteSampler(particles, simul);
+                   particles = rouletteSampler(particles, simul);
            // MAIN PARTICLE FILTER ALGORITHM
            // ----------------------------------------------------------
            //update motion model
 
            //update sensor model
 
-            particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
-            particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
+                    particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
+                    particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
 
            // }
            //resample

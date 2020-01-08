@@ -1,0 +1,5 @@
+turtlebot/turtlebot_description
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_description/cmake.lock /home/timur/mkr_tm_ws/devel/./cmake.lock
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_description/share/turtlebot_description/cmake/turtlebot_descriptionConfig-version.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_description/cmake/turtlebot_descriptionConfig-version.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_description/share/turtlebot_description/cmake/turtlebot_descriptionConfig.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_description/cmake/turtlebot_descriptionConfig.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_description/lib/pkgconfig/turtlebot_description.pc /home/timur/mkr_tm_ws/devel/lib/pkgconfig/turtlebot_description.pc

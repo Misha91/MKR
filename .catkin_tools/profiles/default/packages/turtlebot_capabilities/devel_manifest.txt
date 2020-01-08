@@ -1,0 +1,5 @@
+turtlebot/turtlebot_capabilities
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_capabilities/cmake.lock /home/timur/mkr_tm_ws/devel/./cmake.lock
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_capabilities/share/turtlebot_capabilities/cmake/turtlebot_capabilitiesConfig.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_capabilities/cmake/turtlebot_capabilitiesConfig.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_capabilities/share/turtlebot_capabilities/cmake/turtlebot_capabilitiesConfig-version.cmake /home/timur/mkr_tm_ws/devel/share/turtlebot_capabilities/cmake/turtlebot_capabilitiesConfig-version.cmake
+/home/timur/mkr_tm_ws/devel/.private/turtlebot_capabilities/lib/pkgconfig/turtlebot_capabilities.pc /home/timur/mkr_tm_ws/devel/lib/pkgconfig/turtlebot_capabilities.pc

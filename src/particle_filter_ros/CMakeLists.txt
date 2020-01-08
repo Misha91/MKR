@@ -3,7 +3,7 @@ project(particle_filter_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
-
+add_definitions("-std=c++11")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -13,6 +13,19 @@ find_package(catkin REQUIRED
   roscpp
   tf2
 )
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+include_directories ("${PROJECT_SOURCE_DIR}/src")
+
+add_subdirectory(src/dataLoader)
+set(LIBS LaserDataLoader)
+
+add_subdirectory(src/gui)
+set(LIBS ${LIBS} Gui)
+
+add_subdirectory(src/laserSimulator)
+set(LIBS ${LIBS} lasersimulator)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -138,6 +151,7 @@ target_link_libraries(${PROJECT_NAME}_particle_filter
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(${PROJECT_NAME}_particle_filter ${LIBS} ${VTK_LIBRARIES})
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

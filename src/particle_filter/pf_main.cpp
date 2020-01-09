@@ -205,7 +205,7 @@ ParticleVector weightUpdate(ParticleVector init, LaserSimulator simul, LaserScan
       }
     }
     // checking of most probable particle's position
-    printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
+    //printf("%.4f %.4f %.4f %.12f (best) %d %d\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi, max_weight.first, z.size(), z_star.size());
     return init;
 }
 
@@ -217,10 +217,10 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
 
     // from videos of motion model --- MM3
     //angle coefficients
-    alpha1 = 0.04; // angle
+    alpha1 = 0.3; // angle
     alpha2 = 0.04; // distance
     //distance coeffcitients
-    alpha3 = 0.4; // distance
+    alpha3 = 0.25; // distance
     alpha4 = 0.04; // two angles
 
     //calculate new randomized deltas based on previous deltas
@@ -462,7 +462,7 @@ int main(int argc, char** argv)
          scanPoints = simul.getRawPoints();
          if (i > 0)
          {
-           printf("%.4f %.4f %.4f (real)\n", pos.x, pos.y, pos.phi);
+           //printf("%.4f %.4f %.4f (real)\n", pos.x, pos.y, pos.phi);
            // MEASUREMENTS AND RELATED CALCULATIONS FOR MOTION MODEL
            // --------------------------------------------------------
            // calculate step position differences from odometry
@@ -481,31 +481,31 @@ int main(int argc, char** argv)
            delta_rot2 = normalize_angle(delta_rot2);
            // change in position aka length of step
            delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
-           // ----------------------------------------------------------
-           // if ((delta_x < 0.00000000000001) || (delta_y<0.0000000000000001)){
-                    // particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);
-           // }
-           // else {
-                   particles = rouletteSampler(particles, simul);
+
+           if (fabs(delta_trans) < 0.3 &&  fabs(delta_phi) < 0.15){
+             continue;
+           }
+
+           particles = rouletteSampler(particles, simul);
            // MAIN PARTICLE FILTER ALGORITHM
            // ----------------------------------------------------------
            //update motion model
 
            //update sensor model
 
-                    particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
-                    particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
-
+            particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
+            particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
+            prev_pos = pos;
            // }
            //resample
            //
            // ----------------------------------------------------------
-           printf("\n");
+           //printf("\n");
            max_weight.first = 0;
          }
 
          // storing position data
-         prev_pos = pos;
+
 
 
          //DO WE NEED THIS? - TU

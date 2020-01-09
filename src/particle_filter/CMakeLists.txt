@@ -8,7 +8,7 @@ add_definitions("-std=c++11")
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
-include_directories ("${PROJECT_SOURCE_DIR}/src")
+include_directories ("${PROJECT_SOURCE_DIR}")
 
 add_subdirectory(dataLoader)
 set(LIBS LaserDataLoader)

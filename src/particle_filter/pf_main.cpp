@@ -224,8 +224,6 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
     alpha4 = 0.04; // two angles
 
     //calculate new randomized deltas based on previous deltas
-
-
     //update each particle with respect to the common new deltas(<delta_hat>s)
 
     for (auto &a:init)
@@ -237,13 +235,11 @@ ParticleVector moveParticles(ParticleVector init, double delta_rot1, double delt
           delta_hat_rot1 = normalSample(delta_rot1, alpha1*fabs(delta_rot1)+alpha2*fabs(delta_trans));
           delta_hat_rot2 = normalSample(delta_rot2, alpha1*fabs(delta_rot2)+alpha2*fabs(delta_trans));
           delta_hat_trans = normalSample(delta_trans, alpha3*fabs(delta_trans)+alpha4*(fabs(delta_rot1)+fabs(delta_rot2)));
-          //printf("%.2f\t", a.pos.x);
+
           tmp.x = a.pos.x + delta_hat_trans*cos(a.pos.phi + delta_hat_rot1);
-          //printf("%.2f\n", a.pos.x);
           tmp.y = a.pos.y + delta_hat_trans*sin(a.pos.phi + delta_hat_rot1);
           tmp.phi = a.pos.phi + delta_hat_rot1 + delta_hat_rot2;
-          //if (tmp.x <= -16.96 || tmp.x >= 19.7243) continue;
-          //if (tmp.y <= -43.25 || tmp.y >= 55.0255) continue;
+
           if (!simul.isFeasible(tmp)){
               do {
                 // random particle
@@ -273,35 +269,25 @@ ParticleVector rouletteSampler(const ParticleVector init, LaserSimulator simul){
         hashTable[weightAdder] = i;
     }
 
-    int cntMaxW = 0;
     double meanWeight = 0.0;
 
     // resample 85 % of particles
     for (int i = 0; i < (0.95*init.size()); i++)
     {
-        //for (int i = 0; i < 10; i++){
 
         //take random number from 0 to sum of weights
         double tmp = uniformSample(0, weightAdder);
-
-        //printf("%.12f\n", tmp);
 
         //find particle according to the table
         Particle won = init[hashTable.lower_bound(tmp)->second];
         result.push_back(won);
 
         // counting how many times the most probable particle was selected
-        if (won.pos.x == max_weight.second.pos.x &&  won.pos.y == max_weight.second.pos.y && won.pos.phi == max_weight.second.pos.phi){
-          cntMaxW++;
-        }
+
         // add weight of the selected particle ---- can be changed to won.weight
         meanWeight += init[hashTable.lower_bound(tmp)->second].weight;
 
     }
-
-    //printf("MW won %d\n", cntMaxW);
-    //printf("%.4f %.4f %.4f\n", max_weight.second.pos.x, max_weight.second.pos.y, max_weight.second.pos.phi);
-
 
     // set 15 % of all particles to random position and mean weight
     meanWeight /= result.size();
@@ -456,90 +442,47 @@ int main(int argc, char** argv)
 
     for (size_t i = 0; i < nMeasurements; i++)
     {
-         pos = loader[i].position;
-         LaserScan scanTest = loader[i].scan; //0th, 10th, 20th
-         scan = simul.getScan(pos); //36
-         scanPoints = simul.getRawPoints();
-         if (i > 0)
-         {
-           //printf("%.4f %.4f %.4f (real)\n", pos.x, pos.y, pos.phi);
-           // MEASUREMENTS AND RELATED CALCULATIONS FOR MOTION MODEL
-           // --------------------------------------------------------
-           // calculate step position differences from odometry
-           delta_x = pos.x - prev_pos.x;
-           delta_y = pos.y - prev_pos.y;
-           delta_phi = pos.phi - prev_pos.phi;
-           // calculate orientation of movement line
-           theta = atan2(pos.y-prev_pos.y,pos.x-prev_pos.x); //radians
-           // previous state angle delta
-           delta_rot1 = theta-prev_pos.phi;
-           delta_rot1 = normalize_angle(delta_rot1);
+    pos = loader[i].position;
+    LaserScan scanTest = loader[i].scan; //0th, 10th, 20th
+    scan = simul.getScan(pos); //36
+    scanPoints = simul.getRawPoints();
+    if (i > 0)
+    {
+      // MEASUREMENTS AND RELATED CALCULATIONS FOR MOTION MODEL
+      // --------------------------------------------------------
+      // calculate step position differences from odometry
+      delta_x = pos.x - prev_pos.x;
+      delta_y = pos.y - prev_pos.y;
+      delta_phi = pos.phi - prev_pos.phi;
+      // calculate orientation of movement line
+      theta = atan2(pos.y-prev_pos.y,pos.x-prev_pos.x); //radians
+      // previous state angle delta
+      delta_rot1 = theta-prev_pos.phi;
+      delta_rot1 = normalize_angle(delta_rot1);
 
 
-           // current state angle delta
-           delta_rot2 = delta_phi - delta_rot1;
-           delta_rot2 = normalize_angle(delta_rot2);
-           // change in position aka length of step
-           delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
+      // current state angle delta
+      delta_rot2 = delta_phi - delta_rot1;
+      delta_rot2 = normalize_angle(delta_rot2);
+      // change in position aka length of step
+      delta_trans = sqrt(pow(delta_x,2)+pow(delta_y,2));
 
-           if (fabs(delta_trans) < 0.3 &&  fabs(delta_phi) < 0.15){
-             continue;
-           }
+      if (fabs(delta_trans) < 0.3 &&  fabs(delta_phi) < 0.15)
+      {
+       continue;
+      }
 
-           particles = rouletteSampler(particles, simul);
-           // MAIN PARTICLE FILTER ALGORITHM
-           // ----------------------------------------------------------
-           //update motion model
+      particles = rouletteSampler(particles, simul);
+      particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);
+      particles = weightUpdate(particles, simul, scanTest);
 
-           //update sensor model
-
-            particles = moveParticles(particles, delta_rot1,delta_rot2,delta_trans, simul);// please check
-            particles = weightUpdate(particles, simul, scanTest); //use scanTest instead - done by MI
-            prev_pos = pos;
-           // }
-           //resample
-           //
-           // ----------------------------------------------------------
-           //printf("\n");
-           max_weight.first = 0;
-         }
-
-         // storing position data
+      prev_pos = pos;
+      max_weight.first = 0;
+    }
 
 
 
-         //DO WE NEED THIS? - TU
-         // --------------------
-         /*
-         printf("\nPARTICLES:\n");
-         for (auto &a:particles){
-           printf("%.2f %.2f %.2f %.4f\n", a.pos.x, a.pos.y, a.pos.phi, a.weight);
 
-         }
-
-
-         printf("\n%d\n", scanPoints.size());
-
-         for (auto &a:scanPoints){
-           printf("%.2f\t", a);
-         }
-
-         printf("\n%d\n", scan.size());
-
-         for (auto &a:scan){
-           printf("%.2f\t", a);
-         }
-
-         printf("\n%d\n", scanTest.size());
-
-         for (auto &a:scanTest){
-           printf("%.2f\t", a);
-         }
-         */
-         // ------------------
-
-         // printing particles on map
-         // gui.clearPositionPoints();
          gui.setPosition(robotPosition2point(pos));
          gui.clearMapPoints();
          gui.setPointsToMap(scanPoints, robotPosition2point(pos));

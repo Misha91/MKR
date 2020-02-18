@@ -5,9 +5,16 @@ Part I - Multi robot planning
 [video](<https://youtu.be/jGYrxGyDIUE>)
 
 <br/>
-Part II - Kalman filter<br/>
-Part III - Particle filter<br/>
+Part II - Kalman filter
 
+[video](<https://youtu.be/V-C31kcMgH8>)
+
+<br/>
+Part III - Particle filter
+
+[video](<https://youtu.be/sZPrtwbSUmE>)
+
+<br/>
 
 <br/>
 <br/>

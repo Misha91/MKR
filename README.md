@@ -1,5 +1,25 @@
 # mkr_tm_ws
-*NOT IN PROGRESS* 
+<br/>
+Part I - Multi robot planning 
+
+[video](<https://youtu.be/jGYrxGyDIUE>)
+
+<br/>
+Part II - Kalman filter
+
+[video](<https://youtu.be/V-C31kcMgH8>)
+
+<br/>
+Part III - Particle filter
+
+[video](<https://youtu.be/sZPrtwbSUmE>)
+
+<br/>
+
+<br/>
+<br/>
+Part I
+<br/>
 
 Launch command
 <b>roslaunch motion start.launch</b>
@@ -25,14 +45,6 @@ Each row is one robot
 <br/>
 <br/>
 <br/>
-<b>Suggestions for finishing the first part:</b>
-<br/>
-Have a look at robots.launch in simulator_e130 folder.
-<br/>
-You will probably need to write a script that changes its configurations so that the robots are inserted there.
-<br/>
-Have fun! :)
-<br/>
 <b>Guide:  </b>
 <br/>
 If you are working under any function/task, change top line to *IN PROGRESS*, commit and push it to repo with message like "MI - in progress" - this will let us know if work in progress and let us to avoid any merge conflict (git commit -m "MI - in progress").  
@@ -49,6 +61,8 @@ A* planning - MI
 Feel free to split any task on any number of sub-tasks, it's easier to do few small tasks rather than one big.  
 <br />
 Install stdr_simulator and turtlebot_simulator packages yourself, because it depends on the version of ROS that you have  
+<br/>
+<br/>
 <br/>
 <b>Useful Git commands:  </b>
 <br/>
@@ -71,7 +85,9 @@ Pull and fetch:
 git pull  
 git fetch  
 <br/>
-
+<br/>
+<br/>
+Ivanov & Uzakov
 
 
 

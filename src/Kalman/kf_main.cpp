@@ -97,8 +97,8 @@ int main(int argc, char** argv)
 
 // """ MEASUREMENT UNCERTAINTY """
     Q << MatrixXf::Identity(2, 2);
-    Q(0,0) = 5;
-    Q(1,1) = 5;
+    Q(0,0) = 10;
+    Q(1,1) = 10;
 //    Q(2,2) = 4;
 //    Q(3,3) = 4;
 // """ PREDICTION UNCERTAINTY """
@@ -137,10 +137,10 @@ int main(int argc, char** argv)
         gui.setPoints(truth, measurement, kfPosition);
         //> comment line below in order to let the program
         //> continue right away
-        if (i % 20 == 0)
-        {
+        //if (i % 20 == 0)
+        //{
             gui.startInteractor();
-        }
+        //}
 
     }
     gui.startInteractor();
